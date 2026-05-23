@@ -1,6 +1,6 @@
-# CLAUDE.md — DreamNest (宠梦坊) React Native
+# DreamNest (宠梦坊) React Native
 
-> This file is the authoritative rules document for Kilo Code and any LLM agent working in this codebase.
+> This file is the authoritative rules document for any LLM agent working in this codebase.
 > Read this entire file before generating any code. Do not skip sections.
 
 ---
@@ -23,7 +23,14 @@
 4. **Never mix Supabase JWT with backend JWT.** Supabase token is only used to obtain the backend-issued JWT via the `/auth/supabase` exchange endpoint. After that, only the backend JWT is used in `Authorization: Bearer` headers.
 5. **Never use `any` type in TypeScript** unless explicitly commented with a reason. Use `unknown` and narrow types properly.
 6. **Never commit secrets.** `.env` is gitignored. All keys go in `.env.local` (development) and environment variables (CI/production).
-7. **One file per task.** Do not modify multiple unrelated files in a single response.
+7. **One coherent change per task.** A task may touch multiple files if they form a single logical unit (e.g., adding a new screen requires updating both the screen file and `AppNavigator.tsx`; localizing a screen requires updating the screen file alongside its locale resource files; fixing navigation behavior may require updating `AppNavigator.tsx` alongside the affected screen). What is prohibited: mixing unrelated concerns in the same response (e.g., fixing a UI bug and refactoring state management simultaneously).
+
+   **Permitted multi-file changes (treat as one task):**
+   - Adding a new screen: screen file + `AppNavigator.tsx`
+   - Localizing a screen: screen file + locale resource files under `src/lib/locales/`
+   - Changing navigation behavior or header config: `AppNavigator.tsx` + affected screen(s)
+   - Adding a shared component used immediately: component file + the screen that introduces it
+
 8. **Do not install UI component libraries** (NativeBase, UI Kitten, Tamagui, etc.) during MVP phase. Use `StyleSheet` + `react-native-reanimated` only.
 
 ---
@@ -59,14 +66,15 @@ src/
 ├── store/            # Zustand stores (authStore.ts, dreamStore.ts) — keep them separate
 ├── hooks/            # Custom React hooks (useDreamChat.ts, etc.)
 ├── navigation/       # AppNavigator.tsx only — no logic here
-├── lib/              # Singletons: supabase.ts, http.ts, storage.ts
+├── lib/              # Singletons: supabase.ts, http.ts, storage.ts, i18n.ts
+│   └── locales/      # Locale resource files: en.ts, zh-Hant.ts, zh-Hans.ts
 └── types/            # Shared TypeScript type definitions
 ```
 
 **Rules:**
 - Screens live in `src/screens/`. Never put screen logic in `src/components/`.
 - `src/lib/` files are singletons — never instantiate them inside components.
-- Keep `AppNavigator.tsx` free of business logic. It only reads from `authStore` to branch authenticated/unauthenticated stacks.
+- Keep `AppNavigator.tsx` free of business logic. Navigation configuration (`screenOptions`, header styles, animation presets) is permitted. Only `authStore.user` reads are allowed for conditional stack branching — no other store reads, no API calls.
 
 ---
 
@@ -182,16 +190,73 @@ Stack screens pushed from tabs:
 - Never use `navigation.navigate()` for auth redirects — change `authStore.user` and let the navigator re-render
 - Tab 4 (Dream Graph) slot must be structurally reserved even if not implemented
 
+### Header Convention
+
+Index-level screens (Auth, MainTabs/BottomTabNavigator) are **headerless**.
+
+All pushed stack screens must render a native header with:
+- Background: `COLORS.background` (`#0D0B14`)
+- Title color: `COLORS.textPrimary` (`#EDE8FF`)
+- Back chevron tint: `COLORS.primaryAccent` (`#7B6EF6`)
+- An explicit back/close button — do not rely solely on swipe gesture
+
+Configure these as `screenOptions` in `AppNavigator.tsx`, not inside individual screen files.
+
+### Navigation Transitions
+
+| Route | Animation | Back destination |
+|---|---|---|
+| Tab switching | `fade` or instant — never stack-push | — |
+| Journal → DreamDetail | `slide_from_right` (default push) | Journal tab |
+| DreamInput → DreamResult | `slide_from_right` (default push) | DreamInput |
+| Home → DreamInput | `slide_from_bottom` (modal sheet) | Home tab |
+| Auth → MainTabs | State-driven root swap — no transition affordance | — |
+
+### Navigation Behavior Rules
+
+- `DreamResult`'s "Back to Home" action must use `navigation.popToTop()` or `navigation.dispatch(StackActions.popToTop())` — never `navigation.navigate('MainTabs')`, which would stack a duplicate root.
+- `DreamDetail` must always have a visible back action via the unified header even when the dream record is missing (show an error state, not a blank screen).
+
+---
+
+## i18n (Internationalization)
+
+No third-party i18n library. Use the internal singleton at `src/lib/i18n.ts`.
+
+### Structure
+
+```
+src/lib/
+├── i18n.ts              # t(key) helper, language detection, preference persistence
+└── locales/
+    ├── en.ts            # English (default fallback)
+    ├── zh-Hant.ts       # Traditional Chinese
+    └── zh-Hans.ts       # Simplified Chinese
+```
+
+All three locale files must export an object typed against a shared `LocaleKeys` interface defined in `src/types/i18n.ts`. TypeScript will error if a locale is missing a key.
+
+### Rules
+
+- `t(key: keyof LocaleKeys): string` — the only public API for UI copy
+- Language preference persisted in MMKV under key `"lang_pref"` (`"en"` | `"zh-Hant"` | `"zh-Hans"`)
+- On first launch (no MMKV value), detect device locale via `NativeModules.I18nManager.localeIdentifier` and map to the nearest supported locale; fall back to `"en"`
+- Backend/API field names are **never** localized — only UI copy
+- Demo/seed dream records in the UI must also use `t()` keys, not hardcoded Chinese strings
+- Add a language selector in the Profile screen (3 options, radio-style)
+
 ---
 
 ## State Management
 
 ### authStore
+
 Holds: `user` (Supabase User | null), `backendToken` (string | null)  
 Actions: `setUser`, `setBackendToken`, `clear`  
 **Do not add dream state here.**
 
 ### dreamStore
+
 Holds: `streamingContent` (string), `isStreaming` (boolean), `history` (DreamRecord[])  
 Actions: `appendChunk`, `setStreaming`, `setHistory`, `clearStream`  
 **Do not add auth state here.**
@@ -278,4 +343,4 @@ These are the two technical highlight points. Keep them clean.
 
 ---
 
-*Last updated: 2026-05-21 | DreamNest MVP v0.2.0*
+*Last updated: 2026-05-23 | DreamNest MVP v0.3.0*
