@@ -46,12 +46,12 @@ function MainTabsScreen(): React.JSX.Element {
   const renderActiveTab = (): React.JSX.Element => {
     switch (activeTab) {
       case 'Journal':
-        return <JournalScreen />;
+        return <JournalScreen onNavigateToTab={setActiveTab} />;
       case 'Profile':
-        return <ProfileScreen />;
+        return <ProfileScreen onNavigateToTab={setActiveTab} />;
       case 'Home':
       default:
-        return <HomeScreen />;
+        return <HomeScreen onNavigateToTab={setActiveTab} />;
     }
   };
 
@@ -68,13 +68,32 @@ function MainTabsScreen(): React.JSX.Element {
           {VISIBLE_TABS.map(tab => {
             const isActive = activeTab === tab.key;
 
+            const getEmoji = (): string => {
+              switch (tab.key) {
+                case 'Home':
+                  return '🌙';
+                case 'Journal':
+                  return '📖';
+                case 'Profile':
+                  return '👤';
+                default:
+                  return '💭';
+              }
+            };
+
             return (
               <Pressable
                 accessibilityRole="button"
                 key={tab.key}
                 onPress={() => setActiveTab(tab.key)}
-                style={[styles.tabButton, isActive && styles.tabButtonActive]}
+                style={styles.tabButton}
               >
+                <View style={styles.emojiContainer}>
+                  <Text style={[styles.tabEmoji, isActive && styles.tabEmojiActive]}>
+                    {getEmoji()}
+                  </Text>
+                  {isActive && <View style={styles.activeDot} />}
+                </View>
                 <Text
                   style={[styles.tabLabel, isActive && styles.tabLabelActive]}
                 >
@@ -195,7 +214,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   tabBarSafeArea: {
-    backgroundColor: `${COLORS.background}D9`,
+    backgroundColor: `${COLORS.background}FA`,
     borderTopColor: COLORS.surface2,
     borderTopWidth: 1,
   },
@@ -205,26 +224,48 @@ const styles = StyleSheet.create({
   },
   tabBar: {
     flexDirection: 'row',
-    gap: 8,
-    paddingHorizontal: 14,
-    paddingTop: 10,
+    paddingHorizontal: 8,
+    paddingTop: 6,
+    paddingBottom: 4,
+    justifyContent: 'space-around',
+    alignItems: 'center',
   },
   tabButton: {
     alignItems: 'center',
-    borderRadius: 14,
     flex: 1,
-    minHeight: 44,
+    minHeight: 52,
     justifyContent: 'center',
   },
-  tabButtonActive: {
-    backgroundColor: COLORS.surface2,
+  emojiContainer: {
+    height: 26,
+    justifyContent: 'center',
+    alignItems: 'center',
+    position: 'relative',
+    marginBottom: 4,
+  },
+  tabEmoji: {
+    fontSize: 20,
+    opacity: 0.5,
+  },
+  tabEmojiActive: {
+    opacity: 1.0,
+    transform: [{ scale: 1.1 }],
+  },
+  activeDot: {
+    position: 'absolute',
+    bottom: -6,
+    width: 4,
+    height: 4,
+    borderRadius: 2,
+    backgroundColor: COLORS.primaryAccent,
   },
   tabLabel: {
-    ...TYPOGRAPHY.badge,
+    fontSize: 10,
+    fontWeight: '600',
     color: COLORS.textMuted,
   },
   tabLabelActive: {
-    color: COLORS.textPrimary,
+    color: COLORS.primaryAccent,
   },
 });
 

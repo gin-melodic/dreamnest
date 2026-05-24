@@ -1,6 +1,6 @@
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useNavigation } from '@react-navigation/native';
-import React from 'react';
+import React, { useEffect } from 'react';
 import {
   Pressable,
   ScrollView,
@@ -13,52 +13,62 @@ import Animated, {
   useAnimatedStyle,
   useSharedValue,
   withSpring,
+  withRepeat,
+  withSequence,
+  withTiming,
 } from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { t, useI18n } from '../lib/i18n';
 import type { RootStackParamList } from '../navigation/AppNavigator';
-import type { LocaleKeys } from '../types/i18n';
 import { COLORS, TYPOGRAPHY } from '../types/theme';
+import { useDreamStore } from '../store/dreamStore';
 
-type DreamPreview = {
-  id: string;
-  titleKey: keyof LocaleKeys;
-  dateLabelKey: keyof LocaleKeys;
-  emotionKey: keyof LocaleKeys;
-  accentColor: string;
-  summaryKey: keyof LocaleKeys;
+type Props = {
+  onNavigateToTab?: (tab: 'Home' | 'Journal' | 'Profile') => void;
 };
-
-const RECENT_DREAMS: DreamPreview[] = [
-  {
-    id: 'moon-garden',
-    titleKey: 'dreamOneTitle',
-    dateLabelKey: 'dreamOneDate',
-    emotionKey: 'dreamOneEmotion',
-    accentColor: COLORS.primaryAccent,
-    summaryKey: 'dreamOneSummary',
-  },
-  {
-    id: 'orange-train',
-    titleKey: 'dreamTwoTitle',
-    dateLabelKey: 'dreamTwoDate',
-    emotionKey: 'dreamTwoEmotion',
-    accentColor: COLORS.secondaryAccent,
-    summaryKey: 'dreamTwoSummary',
-  },
-];
 
 const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
 
-function HomeScreen(): React.JSX.Element {
+function HomeScreen({ onNavigateToTab }: Props): React.JSX.Element {
   useI18n();
   const navigation =
     useNavigation<NativeStackNavigationProp<RootStackParamList>>();
+  
+  const history = useDreamStore(state => state.history);
+  
+  // Animation hooks
   const buttonScale = useSharedValue(1);
+  const sparkleRotation = useSharedValue(0);
+  const breathScale = useSharedValue(1);
+  
   const animatedButtonStyle = useAnimatedStyle(() => ({
     transform: [{ scale: buttonScale.value }],
   }));
+
+  const animatedSparkleStyle = useAnimatedStyle(() => ({
+    transform: [{ rotate: `${sparkleRotation.value}deg` }],
+  }));
+
+  const animatedBreathStyle = useAnimatedStyle(() => ({
+    transform: [{ scale: breathScale.value }],
+  }));
+
+  useEffect(() => {
+    sparkleRotation.value = withRepeat(
+      withTiming(360, { duration: 8000 }),
+      -1,
+      false
+    );
+    breathScale.value = withRepeat(
+      withSequence(
+        withTiming(1.05, { duration: 2500 }),
+        withTiming(1.0, { duration: 2500 })
+      ),
+      -1,
+      true
+    );
+  }, [sparkleRotation, breathScale]);
 
   const handlePressIn = (): void => {
     buttonScale.value = withSpring(0.96, { damping: 16, stiffness: 260 });
@@ -72,81 +82,210 @@ function HomeScreen(): React.JSX.Element {
     navigation.navigate('DreamInput');
   };
 
+  // Helper to format today's date in a premium way
+  const getPremiumDateString = (): string => {
+    const today = new Date();
+    const year = today.getFullYear();
+    const month = today.getMonth() + 1;
+    const date = today.getDate();
+    return `${year}年${month}月${date}日 · 晨曦`;
+  };
+
+  // Mock emotional wave heights for 7 days
+  const EMOTIONAL_WAVES = [
+    { label: '05-18', height: 42, color: COLORS.primaryAccent },
+    { label: '05-19', height: 78, color: COLORS.primaryAccent },
+    { label: '05-20', height: 58, color: COLORS.primaryAccent },
+    { label: '05-21', height: 92, color: COLORS.secondaryAccent, highlight: true },
+    { label: '05-22', height: 64, color: COLORS.primaryAccent },
+    { label: '05-23', height: 86, color: COLORS.primaryAccent },
+    { label: '今天', height: 96, color: COLORS.success },
+  ];
+
   return (
     <SafeAreaView style={styles.safeArea}>
       <StatusBar barStyle="light-content" />
+      
+      {/* Immersive Space Nebula Ambient Glows */}
+      <View pointerEvents="none" style={StyleSheet.absoluteFill}>
+        <View style={styles.glowTopLeft} />
+        <View style={styles.glowBottomRight} />
+        <View style={[styles.dustParticle, { top: '25%', right: '20%', opacity: 0.15 }]} />
+        <View style={[styles.dustParticle, { bottom: '35%', left: '15%', opacity: 0.2, width: 3, height: 3 }]} />
+      </View>
+
       <ScrollView
         contentContainerStyle={styles.content}
         showsVerticalScrollIndicator={false}
       >
+        {/* Header Profile */}
         <View style={styles.header}>
-          <View>
-            <Text style={styles.kicker}>{t('appName')}</Text>
-            <Text style={styles.title}>{t('homeTitle')}</Text>
+          <View style={styles.headerLeft}>
+            <Text style={styles.headerDate}>{getPremiumDateString()}</Text>
+            <View style={styles.brandRow}>
+              <Text style={styles.title}>{t('appName')}</Text>
+              <Text style={styles.sparkleEmoji}>✨</Text>
+            </View>
           </View>
-          <View style={styles.streakBadge}>
-            <Text style={styles.streakNumber}>3</Text>
-            <Text style={styles.streakLabel}>{t('homeStreakLabel')}</Text>
-          </View>
-        </View>
-
-        <View style={styles.heroPanel}>
-          <View style={styles.orbitLarge} />
-          <View style={styles.orbitSmall} />
-          <Text style={styles.heroEyebrow}>{t('homeHeroEyebrow')}</Text>
-          <Text style={styles.heroTitle}>{t('homeHeroTitle')}</Text>
-          <Text style={styles.heroBody}>{t('homeHeroBody')}</Text>
-          <AnimatedPressable
+          
+          <Pressable
             accessibilityRole="button"
-            onPress={handleAnalyzeDream}
-            onPressIn={handlePressIn}
-            onPressOut={handlePressOut}
-            style={[styles.primaryButton, animatedButtonStyle]}
+            onPress={() => onNavigateToTab?.('Profile')}
+            style={styles.avatarContainer}
           >
-            <Text style={styles.primaryButtonText}>
-              {t('homeAnalyzeButton')}
+            <Animated.View style={[styles.avatarGradientBorder, animatedBreathStyle]}>
+              <View style={styles.avatarInner}>
+                <Text style={styles.avatarEmoji}>👤</Text>
+              </View>
+            </Animated.View>
+            <View style={styles.onlineIndicator} />
+          </Pressable>
+        </View>
+
+        {/* Floating Recording CTA Header Box */}
+        <AnimatedPressable
+          accessibilityRole="button"
+          onPress={handleAnalyzeDream}
+          onPressIn={handlePressIn}
+          onPressOut={handlePressOut}
+          style={[styles.gradientCTA, animatedButtonStyle]}
+        >
+          <View style={styles.ctaHeader}>
+            <View style={styles.ctaTagContainer}>
+              <Text style={styles.ctaTag}>AI REM 記錄器</Text>
+            </View>
+            <Animated.View style={[styles.sparkleSpinner, animatedSparkleStyle]}>
+              <Text style={styles.sparkleSpinnerText}>✨</Text>
+            </Animated.View>
+          </View>
+          
+          <Text style={styles.ctaTitle}>記錄昨夜的碎羽？</Text>
+          <Text style={styles.ctaSubtitle}>
+            通過三層夢魂神經網絡進行多維解碼，揭示您的深層自性。
+          </Text>
+          
+          <View style={styles.ctaFooter}>
+            <Text style={styles.ctaFooterText}>開始捕捉夢痕</Text>
+            <Text style={styles.ctaChevron}>›</Text>
+          </View>
+        </AnimatedPressable>
+
+        {/* Today's Recommendation Box */}
+        {history.length > 0 && (
+          <Pressable
+            accessibilityRole="button"
+            onPress={() => navigation.navigate('DreamDetail', { dreamId: history[0].id })}
+            style={styles.recommendationCard}
+          >
+            <View style={styles.recHeader}>
+              <View style={styles.recLabelRow}>
+                <Text style={styles.recIcon}>🌙</Text>
+                <Text style={styles.recLabel}>今日推薦解析</Text>
+              </View>
+              <Text style={styles.recScore}>夢境自性 RAG 指數 92%</Text>
+            </View>
+            
+            <Text style={styles.recTitle}>{t(history[0].titleKey)}</Text>
+            <Text style={styles.recBody} numberOfLines={2}>
+              {t(history[0].interpretationKey)}
             </Text>
-          </AnimatedPressable>
-        </View>
+            
+            <View style={styles.recFooter}>
+              <Text style={[styles.recEmotion, { color: history[0].emotionColor }]}>
+                情緒：{t(history[0].emotionKey)}
+              </Text>
+              <Text style={styles.recTier}>L3 高階分析 ›</Text>
+            </View>
+          </Pressable>
+        )}
 
-        <View style={styles.sectionHeader}>
-          <Text style={styles.sectionTitle}>{t('homeRecentTitle')}</Text>
-          <Text style={styles.sectionMeta}>{t('homeRecentMeta')}</Text>
-        </View>
+        {/* Trend Chart (Subconscious emotional waves) */}
+        <View style={styles.chartSection}>
+          <View style={styles.chartHeader}>
+            <View style={styles.chartTitleRow}>
+              <Text style={styles.chartIcon}>📈</Text>
+              <Text style={styles.chartTitle}>過去7天潛意識情緒波動</Text>
+            </View>
+            <Text style={styles.chartMeta}>平靜與奇妙為主</Text>
+          </View>
 
-        <View style={styles.dreamList}>
-          {RECENT_DREAMS.map(dream => (
-            <View key={dream.id} style={styles.dreamCard}>
-              <View
-                style={[
-                  styles.emotionStrip,
-                  { backgroundColor: dream.accentColor },
-                ]}
-              />
-              <View style={styles.dreamCardContent}>
-                <View style={styles.cardTopRow}>
-                  <Text style={styles.cardTitle}>{t(dream.titleKey)}</Text>
-                  <Text style={styles.cardDate}>{t(dream.dateLabelKey)}</Text>
-                </View>
-                <View
-                  style={[
-                    styles.emotionChip,
-                    {
-                      borderColor: `${dream.accentColor}66`,
-                      backgroundColor: `${dream.accentColor}26`,
-                    },
-                  ]}
-                >
-                  <Text
-                    style={[styles.emotionText, { color: dream.accentColor }]}
-                  >
-                    {t(dream.emotionKey)}
+          <View style={styles.chartPanel}>
+            <View style={styles.chartBadge}>
+              <Text style={styles.chartBadgeText}>AI 匹配度: 88%</Text>
+            </View>
+            
+            {/* Grid Line simulation */}
+            <View style={styles.chartGrid}>
+              <View style={styles.gridLine} />
+              <View style={styles.gridLine} />
+              <View style={styles.gridLine} />
+            </View>
+
+            <View style={styles.barsContainer}>
+              {EMOTIONAL_WAVES.map((item, idx) => (
+                <View key={idx} style={styles.barColumn}>
+                  <View style={styles.barBackground}>
+                    <View
+                      style={[
+                        styles.barFill,
+                        {
+                          height: `${item.height}%`,
+                          backgroundColor: item.color,
+                        },
+                        item.highlight && styles.highlightedBarFill
+                      ]}
+                    />
+                  </View>
+                  <Text style={[styles.barLabel, item.highlight && styles.highlightedBarLabel]}>
+                    {item.label}
                   </Text>
                 </View>
-                <Text style={styles.cardSummary}>{t(dream.summaryKey)}</Text>
-              </View>
+              ))}
             </View>
-          ))}
+          </View>
+        </View>
+
+        {/* Horizontal Carousel for History */}
+        <View style={styles.carouselSection}>
+          <Text style={styles.carouselTitle}>
+            夢之回響 · 歷史檔案 ({history.length})
+          </Text>
+          
+          <ScrollView
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            contentContainerStyle={styles.carouselScroll}
+          >
+            {history.map(item => (
+              <Pressable
+                accessibilityRole="button"
+                key={item.id}
+                onPress={() => navigation.navigate('DreamDetail', { dreamId: item.id })}
+                style={styles.carouselCard}
+              >
+                <View style={styles.cardHeader}>
+                  <Text style={styles.cardDate}>{t(item.createdAtKey)}</Text>
+                  <Text style={styles.cardStar}>★</Text>
+                </View>
+                <Text style={styles.cardTitle} numberOfLines={1}>
+                  {t(item.titleKey)}
+                </Text>
+                <View style={styles.cardFooter}>
+                  <View
+                    style={[
+                      styles.emotionTag,
+                      { backgroundColor: `${item.emotionColor}20` },
+                    ]}
+                  >
+                    <Text style={[styles.emotionTagText, { color: item.emotionColor }]}>
+                      {t(item.emotionKey)}
+                    </Text>
+                  </View>
+                  <Text style={styles.lucidityLabel}>高明晰</Text>
+                </View>
+              </Pressable>
+            ))}
+          </ScrollView>
         </View>
       </ScrollView>
     </SafeAreaView>
@@ -158,181 +297,397 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: COLORS.background,
   },
+  glowTopLeft: {
+    position: 'absolute',
+    top: -120,
+    left: -120,
+    width: 350,
+    height: 350,
+    borderRadius: 175,
+    backgroundColor: `${COLORS.primaryAccent}0C`,
+  },
+  glowBottomRight: {
+    position: 'absolute',
+    bottom: -150,
+    right: -150,
+    width: 400,
+    height: 400,
+    borderRadius: 200,
+    backgroundColor: `${COLORS.secondaryAccent}05`,
+  },
+  dustParticle: {
+    position: 'absolute',
+    width: 2,
+    height: 2,
+    borderRadius: 1,
+    backgroundColor: COLORS.textPrimary,
+  },
   content: {
     paddingHorizontal: 20,
-    paddingBottom: 28,
+    paddingBottom: 40,
   },
   header: {
-    alignItems: 'flex-start',
     flexDirection: 'row',
     justifyContent: 'space-between',
-    paddingBottom: 22,
-    paddingTop: 10,
-  },
-  kicker: {
-    ...TYPOGRAPHY.badge,
-    color: COLORS.secondaryAccent,
+    alignItems: 'center',
+    paddingVertical: 16,
     marginBottom: 8,
-    textTransform: 'uppercase',
+  },
+  headerLeft: {
+    flex: 1,
+  },
+  headerDate: {
+    ...TYPOGRAPHY.badge,
+    color: COLORS.textMuted,
+    fontFamily: 'monospace',
+    marginBottom: 4,
+  },
+  brandRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
   },
   title: {
-    ...TYPOGRAPHY.display,
+    fontSize: 26,
+    fontWeight: '800',
     color: COLORS.textPrimary,
-    maxWidth: 250,
+    letterSpacing: -0.5,
   },
-  streakBadge: {
-    alignItems: 'center',
-    backgroundColor: COLORS.surface,
-    borderColor: COLORS.textFaint,
-    borderRadius: 16,
-    borderWidth: 1,
-    minWidth: 68,
-    paddingHorizontal: 12,
-    paddingVertical: 10,
+  sparkleEmoji: {
+    fontSize: 20,
+    marginLeft: 6,
   },
-  streakNumber: {
-    ...TYPOGRAPHY.title,
-    color: COLORS.textPrimary,
+  avatarContainer: {
+    position: 'relative',
   },
-  streakLabel: {
-    ...TYPOGRAPHY.badge,
-    color: COLORS.textMuted,
-    marginTop: 2,
-  },
-  heroPanel: {
-    backgroundColor: COLORS.surface,
-    borderColor: COLORS.surface2,
-    borderRadius: 16,
-    borderWidth: 1,
-    minHeight: 260,
-    overflow: 'hidden',
-    padding: 22,
-    shadowColor: COLORS.background,
-    shadowOffset: { width: 0, height: 14 },
-    shadowOpacity: 0.46,
-    shadowRadius: 24,
-  },
-  orbitLarge: {
-    backgroundColor: `${COLORS.primaryAccent}1F`,
-    borderColor: `${COLORS.primaryAccent}4D`,
-    borderRadius: 82,
-    borderWidth: 1,
-    height: 164,
-    position: 'absolute',
-    right: -38,
-    top: -46,
-    width: 164,
-  },
-  orbitSmall: {
-    backgroundColor: `${COLORS.secondaryAccent}24`,
-    borderColor: `${COLORS.secondaryAccent}59`,
-    borderRadius: 38,
-    borderWidth: 1,
-    height: 76,
-    position: 'absolute',
-    right: 34,
-    top: 48,
-    width: 76,
-  },
-  heroEyebrow: {
-    ...TYPOGRAPHY.badge,
-    color: COLORS.textMuted,
-    marginBottom: 12,
-  },
-  heroTitle: {
-    ...TYPOGRAPHY.title,
-    color: COLORS.textPrimary,
-    maxWidth: 260,
-  },
-  heroBody: {
-    ...TYPOGRAPHY.body,
-    color: COLORS.textMuted,
-    marginBottom: 24,
-    marginTop: 12,
-    maxWidth: 290,
-  },
-  primaryButton: {
-    alignItems: 'center',
-    alignSelf: 'flex-start',
+  avatarGradientBorder: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    padding: 2,
     backgroundColor: COLORS.primaryAccent,
-    borderRadius: 14,
     justifyContent: 'center',
-    minHeight: 50,
-    minWidth: 180,
-    paddingHorizontal: 18,
-  },
-  primaryButtonText: {
-    ...TYPOGRAPHY.secondary,
-    color: COLORS.textPrimary,
-    fontWeight: '700',
-  },
-  sectionHeader: {
-    alignItems: 'flex-end',
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginBottom: 12,
-    marginTop: 28,
-  },
-  sectionTitle: {
-    ...TYPOGRAPHY.title,
-    color: COLORS.textPrimary,
-  },
-  sectionMeta: {
-    ...TYPOGRAPHY.badge,
-    color: COLORS.textFaint,
-  },
-  dreamList: {
-    gap: 14,
-  },
-  dreamCard: {
-    backgroundColor: COLORS.surface,
-    borderRadius: 16,
-    flexDirection: 'row',
-    minHeight: 146,
-    overflow: 'hidden',
-    shadowColor: COLORS.background,
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.4,
-    shadowRadius: 20,
-  },
-  emotionStrip: {
-    width: 4,
-  },
-  dreamCardContent: {
-    flex: 1,
-    padding: 16,
-  },
-  cardTopRow: {
     alignItems: 'center',
+  },
+  avatarInner: {
+    width: '100%',
+    height: '100%',
+    borderRadius: 20,
+    backgroundColor: COLORS.surface,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  avatarEmoji: {
+    fontSize: 18,
+  },
+  onlineIndicator: {
+    position: 'absolute',
+    bottom: 0,
+    right: 0,
+    width: 12,
+    height: 12,
+    borderRadius: 6,
+    backgroundColor: COLORS.success,
+    borderWidth: 2,
+    borderColor: COLORS.background,
+  },
+  gradientCTA: {
+    backgroundColor: COLORS.primaryAccent,
+    borderRadius: 24,
+    padding: 22,
+    marginBottom: 20,
+    shadowColor: COLORS.primaryAccent,
+    shadowOffset: { width: 0, height: 10 },
+    shadowOpacity: 0.25,
+    shadowRadius: 15,
+    elevation: 8,
+    overflow: 'hidden',
+  },
+  ctaHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    marginBottom: 10,
-  },
-  cardTitle: {
-    ...TYPOGRAPHY.body,
-    color: COLORS.textPrimary,
-    flex: 1,
-    fontWeight: '700',
-    paddingRight: 12,
-  },
-  cardDate: {
-    ...TYPOGRAPHY.badge,
-    color: COLORS.textFaint,
-  },
-  emotionChip: {
-    alignSelf: 'flex-start',
-    borderRadius: 999,
-    borderWidth: 1,
+    alignItems: 'center',
     marginBottom: 12,
+  },
+  ctaTagContainer: {
+    backgroundColor: 'rgba(255, 255, 255, 0.15)',
     paddingHorizontal: 10,
     paddingVertical: 4,
+    borderRadius: 8,
   },
-  emotionText: {
+  ctaTag: {
+    fontSize: 10,
+    fontWeight: '700',
+    color: COLORS.textPrimary,
+    letterSpacing: 1.0,
+  },
+  sparkleSpinner: {
+    width: 28,
+    height: 28,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  sparkleSpinnerText: {
+    fontSize: 18,
+  },
+  ctaTitle: {
+    fontSize: 20,
+    fontWeight: '800',
+    color: COLORS.textPrimary,
+    marginBottom: 6,
+  },
+  ctaSubtitle: {
+    ...TYPOGRAPHY.secondary,
+    color: 'rgba(237, 232, 255, 0.85)',
+    lineHeight: 18,
+    marginBottom: 16,
+  },
+  ctaFooter: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  ctaFooterText: {
     ...TYPOGRAPHY.badge,
+    color: COLORS.textPrimary,
+    fontWeight: '700',
   },
-  cardSummary: {
+  ctaChevron: {
+    fontSize: 16,
+    fontWeight: '700',
+    color: COLORS.textPrimary,
+    marginLeft: 6,
+    top: -1,
+  },
+  recommendationCard: {
+    backgroundColor: COLORS.surface,
+    borderColor: `${COLORS.primaryAccent}33`,
+    borderWidth: 1,
+    borderRadius: 24,
+    padding: 18,
+    marginBottom: 24,
+  },
+  recHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 12,
+  },
+  recLabelRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  recIcon: {
+    fontSize: 14,
+    marginRight: 6,
+  },
+  recLabel: {
+    ...TYPOGRAPHY.badge,
+    color: COLORS.secondaryAccent,
+    fontWeight: '700',
+  },
+  recScore: {
+    fontSize: 9,
+    fontFamily: 'monospace',
+    color: COLORS.textMuted,
+  },
+  recTitle: {
+    ...TYPOGRAPHY.secondary,
+    fontWeight: '700',
+    color: COLORS.textPrimary,
+    marginBottom: 6,
+  },
+  recBody: {
     ...TYPOGRAPHY.secondary,
     color: COLORS.textMuted,
+    lineHeight: 18,
+    marginBottom: 14,
+  },
+  recFooter: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    borderTopWidth: 1,
+    borderTopColor: COLORS.surface2,
+    paddingTop: 10,
+  },
+  recEmotion: {
+    fontSize: 10,
+    fontWeight: '600',
+  },
+  recTier: {
+    fontSize: 10,
+    fontWeight: '700',
+    color: COLORS.primaryAccent,
+  },
+  chartSection: {
+    marginBottom: 24,
+  },
+  chartHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'flex-end',
+    marginBottom: 12,
+  },
+  chartTitleRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  chartIcon: {
+    fontSize: 16,
+    marginRight: 6,
+  },
+  chartTitle: {
+    ...TYPOGRAPHY.badge,
+    color: COLORS.textMuted,
+    fontWeight: '700',
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
+  },
+  chartMeta: {
+    fontSize: 10,
+    color: COLORS.success,
+    fontFamily: 'monospace',
+  },
+  chartPanel: {
+    backgroundColor: COLORS.surface,
+    borderColor: COLORS.surface2,
+    borderWidth: 1,
+    borderRadius: 24,
+    padding: 16,
+    position: 'relative',
+    height: 160,
+    justifyContent: 'flex-end',
+  },
+  chartBadge: {
+    position: 'absolute',
+    top: 12,
+    right: 12,
+    backgroundColor: `${COLORS.primaryAccent}1F`,
+    borderColor: `${COLORS.primaryAccent}4D`,
+    borderWidth: 1,
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 12,
+  },
+  chartBadgeText: {
+    fontSize: 8,
+    fontFamily: 'monospace',
+    color: COLORS.primaryAccent,
+  },
+  chartGrid: {
+    position: 'absolute',
+    top: 40,
+    bottom: 36,
+    left: 16,
+    right: 16,
+    justifyContent: 'space-between',
+    opacity: 0.05,
+  },
+  gridLine: {
+    height: 1,
+    backgroundColor: COLORS.textPrimary,
+    width: '100%',
+  },
+  barsContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'flex-end',
+    height: 100,
+    paddingHorizontal: 4,
+  },
+  barColumn: {
+    alignItems: 'center',
+    flex: 1,
+  },
+  barBackground: {
+    height: 80,
+    width: 8,
+    backgroundColor: COLORS.surface2,
+    borderRadius: 4,
+    justifyContent: 'flex-end',
+    overflow: 'hidden',
+  },
+  barFill: {
+    width: '100%',
+    borderRadius: 4,
+  },
+  highlightedBarFill: {
+    shadowColor: COLORS.secondaryAccent,
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 0.5,
+    shadowRadius: 4,
+  },
+  barLabel: {
+    fontSize: 8,
+    color: COLORS.textFaint,
+    marginTop: 6,
+    fontFamily: 'monospace',
+  },
+  highlightedBarLabel: {
+    color: COLORS.secondaryAccent,
+    fontWeight: '700',
+  },
+  carouselSection: {
+    marginBottom: 10,
+  },
+  carouselTitle: {
+    ...TYPOGRAPHY.badge,
+    color: COLORS.textMuted,
+    fontWeight: '700',
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
+    marginBottom: 12,
+  },
+  carouselScroll: {
+    paddingRight: 20,
+    gap: 12,
+  },
+  carouselCard: {
+    width: 146,
+    height: 105,
+    backgroundColor: COLORS.surface,
+    borderColor: COLORS.surface2,
+    borderWidth: 1,
+    borderRadius: 18,
+    padding: 12,
+    justifyContent: 'space-between',
+  },
+  cardHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  cardDate: {
+    fontSize: 9,
+    color: COLORS.textMuted,
+    fontFamily: 'monospace',
+  },
+  cardStar: {
+    fontSize: 10,
+    color: COLORS.secondaryAccent,
+  },
+  cardTitle: {
+    fontSize: 12,
+    fontWeight: '700',
+    color: COLORS.textPrimary,
+    marginVertical: 4,
+  },
+  cardFooter: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  emotionTag: {
+    paddingHorizontal: 6,
+    paddingVertical: 2.5,
+    borderRadius: 6,
+  },
+  emotionTagText: {
+    fontSize: 8,
+    fontWeight: '700',
+  },
+  lucidityLabel: {
+    fontSize: 8,
+    color: COLORS.textFaint,
   },
 });
 
