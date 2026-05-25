@@ -33,11 +33,19 @@ export type DreamRecordDto = {
 };
 
 export type DreamListRequest = {
+  startDate?: string;
+  endDate?: string;
+  pageSize?: number;
+  page?: number;
   keyword?: string;
   emotion?: DreamEmotion;
   favoriteOnly?: boolean;
   cursor?: string;
   limit?: number;
+};
+
+type DreamQueryParams = DreamListRequest & {
+  id?: string;
 };
 
 export type DreamListResponse = {
@@ -131,11 +139,31 @@ function getRequiredBaseUrl(): string {
   return value.replace(/\/$/, '');
 }
 
-function buildQuery(params: DreamListRequest): string {
+function buildQuery(params: DreamQueryParams): string {
   const query = new URLSearchParams();
+
+  if (params.id) {
+    query.set('id', params.id);
+  }
 
   if (params.keyword) {
     query.set('keyword', params.keyword);
+  }
+
+  if (params.startDate) {
+    query.set('startDate', params.startDate);
+  }
+
+  if (params.endDate) {
+    query.set('endDate', params.endDate);
+  }
+
+  if (params.pageSize !== undefined) {
+    query.set('pageSize', String(params.pageSize));
+  }
+
+  if (params.page !== undefined) {
+    query.set('page', String(params.page));
   }
 
   if (params.emotion) {
@@ -162,19 +190,21 @@ export function listDreams(
   params: DreamListRequest = {},
 ): Promise<DreamListResponse> {
   return http.get<unknown, DreamListResponse>(
-    `/v1/dreams${buildQuery(params)}`,
+    `/v1/dream/list${buildQuery(params)}`,
   );
 }
 
 export function getDream(dreamId: string): Promise<DreamRecordDto> {
-  return http.get<unknown, DreamRecordDto>(`/v1/dreams/${dreamId}`);
+  return http.get<unknown, DreamRecordDto>(
+    `/v1/dream/detail${buildQuery({ id: dreamId })}`,
+  );
 }
 
 export function createDreamAnalysis(
   payload: CreateDreamAnalysisRequest,
 ): Promise<CreateDreamAnalysisResponse> {
   return http.post<unknown, CreateDreamAnalysisResponse>(
-    '/v1/dreams/analyze',
+    '/v1/dream/analyze',
     payload,
   );
 }
@@ -183,29 +213,35 @@ export function updateDream(
   dreamId: string,
   payload: UpdateDreamRequest,
 ): Promise<DreamRecordDto> {
-  return http.put<unknown, DreamRecordDto>(`/v1/dreams/${dreamId}`, payload);
+  return http.put<unknown, DreamRecordDto>('/v1/dream/update', {
+    ...payload,
+    id: dreamId,
+  });
 }
 
 export function setDreamFavorite(
   dreamId: string,
   isFavorite: boolean,
 ): Promise<DreamRecordDto> {
-  return http.patch<unknown, DreamRecordDto>(`/v1/dreams/${dreamId}/favorite`, {
-    isFavorite,
+  return http.patch<unknown, DreamRecordDto>('/v1/dream/favorite', {
+    id: dreamId,
+    is_favorite: isFavorite,
   });
 }
 
 export function deleteDream(dreamId: string): Promise<void> {
-  return http.delete<unknown, void>(`/v1/dreams/${dreamId}`);
+  return http.post<unknown, void>('/v1/dream/delete', {
+    id: dreamId,
+  });
 }
 
 export function getHomeStats(): Promise<HomeStats> {
-  return http.get<unknown, HomeStats>('/v1/dreams/home');
+  return http.get<unknown, HomeStats>('/v1/dream/home');
 }
 
 export function getTodayRecommendation(): Promise<HomeRecommendation> {
   return http.get<unknown, HomeRecommendation>(
-    '/v1/dreams/recommendation/today',
+    '/v1/dream/recommendation/today',
   );
 }
 
@@ -214,5 +250,5 @@ export function createDreamChatWebSocket(): WebSocket {
   const encodedToken = token ? encodeURIComponent(token) : '';
   const wsBaseUrl = getRequiredBaseUrl().replace(/^http/, 'ws');
 
-  return new WebSocket(`${wsBaseUrl}/chat/ws?token=${encodedToken}`);
+  return new WebSocket(`${wsBaseUrl}/v1/chat/ws?token=${encodedToken}`);
 }

@@ -74,7 +74,7 @@ export async function getSupabaseSession(): Promise<Session | null> {
 export async function exchangeSupabaseToken(
   supabaseToken: string,
 ): Promise<ExchangeSupabaseTokenResponse> {
-  return http.post<unknown, ExchangeSupabaseTokenResponse>('/auth/supabase', {
+  return http.post<unknown, ExchangeSupabaseTokenResponse>('/v1/email/auth', {
     supabase_token: supabaseToken,
   } satisfies ExchangeSupabaseTokenRequest);
 }
