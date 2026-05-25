@@ -33,7 +33,7 @@ const getEmotionStyles = (emotion: string) => {
         bg: 'rgba(224, 107, 139, 0.15)',
         border: 'rgba(224, 107, 139, 0.4)',
         text: '#E06B8B',
-        tag: '👿 夢魘',
+        tag: `👿 ${t('emotionNightmare')}`,
         colorCode: '#E06B8B',
       };
     case 'anxiety':
@@ -41,7 +41,7 @@ const getEmotionStyles = (emotion: string) => {
         bg: 'rgba(232, 155, 77, 0.15)',
         border: 'rgba(232, 155, 77, 0.4)',
         text: '#E89B4D',
-        tag: '🌪️ 焦慮',
+        tag: `🌪️ ${t('emotionAnxiety')}`,
         colorCode: '#E89B4D',
       };
     case 'calm':
@@ -49,7 +49,7 @@ const getEmotionStyles = (emotion: string) => {
         bg: 'rgba(91, 196, 160, 0.15)',
         border: 'rgba(91, 196, 160, 0.4)',
         text: '#5BC4A0',
-        tag: '🍃 平靜',
+        tag: `🍃 ${t('emotionCalm')}`,
         colorCode: '#5BC4A0',
       };
     case 'joy':
@@ -57,7 +57,7 @@ const getEmotionStyles = (emotion: string) => {
         bg: 'rgba(123, 110, 246, 0.15)',
         border: 'rgba(123, 110, 246, 0.4)',
         text: '#7B6EF6',
-        tag: '✨ 奇妙',
+        tag: `✨ ${t('emotionJoy')}`,
         colorCode: '#7B6EF6',
       };
     default:
@@ -65,7 +65,7 @@ const getEmotionStyles = (emotion: string) => {
         bg: 'rgba(139, 130, 176, 0.15)',
         border: 'rgba(139, 130, 176, 0.4)',
         text: '#8B82B0',
-        tag: '💭 中性',
+        tag: `💭 ${t('emotionNeutral')}`,
         colorCode: '#8B82B0',
       };
   }
@@ -89,7 +89,7 @@ function JournalScreen({ onNavigateToTab }: Props): React.JSX.Element {
     const localizedKeys = [
       'dreamOneTitle', 'dreamOneDate', 'dreamOneEmotion', 'dreamOneSummary', 'dreamOneContent', 'dreamOneInterpretation',
       'dreamTwoTitle', 'dreamTwoDate', 'dreamTwoEmotion', 'dreamTwoSummary', 'dreamTwoContent', 'dreamTwoInterpretation',
-      'journalKicker', 'journalTitle', 'journalSubtitle'
+      'journalKicker', 'journalTitle', 'journalSubtitle', 'commonToday'
     ];
     if (localizedKeys.includes(textKey)) {
       return t(textKey as any);
@@ -136,7 +136,10 @@ function JournalScreen({ onNavigateToTab }: Props): React.JSX.Element {
       
       // Retrieve premium keywords & favorite state if present
       // @ts-ignore
-      const keywords: string[] = item.aiKeywords || ['潛意識', '夢境符號'];
+      const keywords: string[] = item.aiKeywords || [
+        t('journalKeywordSubconscious'),
+        t('journalKeywordDreamSymbol'),
+      ];
       // @ts-ignore
       const isFavorite: boolean = !!item.isFavorite;
 
@@ -196,7 +199,7 @@ function JournalScreen({ onNavigateToTab }: Props): React.JSX.Element {
                     </View>
                   ))}
                 </View>
-                <Text style={styles.modelTierText}>L3 解析 ›</Text>
+                <Text style={styles.modelTierText}>{t('journalModelTier')}</Text>
               </View>
             </View>
           </Pressable>
@@ -207,11 +210,11 @@ function JournalScreen({ onNavigateToTab }: Props): React.JSX.Element {
   );
 
   const filterOptions: Array<{ key: EmotionType; label: string; emoji: string }> = [
-    { key: 'all', label: '全部', emoji: '🌌' },
-    { key: 'joy', label: '奇妙', emoji: '✨' },
-    { key: 'calm', label: '平靜', emoji: '🍃' },
-    { key: 'anxiety', label: '焦慮', emoji: '🌪' },
-    { key: 'nightmare', label: '夢魘', emoji: '👿' },
+    { key: 'all', label: t('journalFilterAll'), emoji: '🌌' },
+    { key: 'joy', label: t('emotionJoy'), emoji: '✨' },
+    { key: 'calm', label: t('emotionCalm'), emoji: '🍃' },
+    { key: 'anxiety', label: t('emotionAnxiety'), emoji: '🌪' },
+    { key: 'nightmare', label: t('emotionNightmare'), emoji: '👿' },
   ];
 
   return (
@@ -230,7 +233,7 @@ function JournalScreen({ onNavigateToTab }: Props): React.JSX.Element {
         <Text style={styles.searchIcon}>🔍</Text>
         <TextInput
           onChangeText={setSearchQuery}
-          placeholder="在過去記錄中搜尋關鍵詞..."
+          placeholder={t('journalSearchPlaceholder')}
           placeholderTextColor={COLORS.textFaint}
           style={styles.searchInput}
           value={searchQuery}
@@ -286,16 +289,16 @@ function JournalScreen({ onNavigateToTab }: Props): React.JSX.Element {
         ListEmptyComponent={
           <View style={styles.emptyContainer}>
             <Text style={styles.emptyIcon}>📖</Text>
-            <Text style={styles.emptyTitle}>未留片語在人間</Text>
+            <Text style={styles.emptyTitle}>{t('journalEmptyTitle')}</Text>
             <Text style={styles.emptySubtitle}>
-              沒有找到符合條件的夢境記錄。寫下你的第一夜夢絮，點亮首顆「自性」恆星。
+              {t('journalEmptySubtitle')}
             </Text>
             <Pressable
               accessibilityRole="button"
               onPress={() => onNavigateToTab?.('Home')}
               style={styles.emptyBtn}
             >
-              <Text style={styles.emptyBtnText}>🌙 去占卜我的第一個夢境</Text>
+              <Text style={styles.emptyBtnText}>{t('journalEmptyButton')}</Text>
             </Pressable>
           </View>
         }

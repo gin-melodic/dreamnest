@@ -37,7 +37,7 @@ const getEmotionStyles = (emotion: EmotionType) => {
         border: 'rgba(224, 107, 139, 0.4)',
         text: '#E06B8B',
         icon: '👿',
-        label: '夢魘',
+        label: t('emotionNightmare'),
       };
     case 'anxiety':
       return {
@@ -45,7 +45,7 @@ const getEmotionStyles = (emotion: EmotionType) => {
         border: 'rgba(232, 155, 77, 0.4)',
         text: '#E89B4D',
         icon: '🌪️',
-        label: '焦慮',
+        label: t('emotionAnxiety'),
       };
     case 'calm':
       return {
@@ -53,7 +53,7 @@ const getEmotionStyles = (emotion: EmotionType) => {
         border: 'rgba(91, 196, 160, 0.4)',
         text: '#5BC4A0',
         icon: '🍃',
-        label: '平靜',
+        label: t('emotionCalm'),
       };
     case 'joy':
       return {
@@ -61,7 +61,7 @@ const getEmotionStyles = (emotion: EmotionType) => {
         border: 'rgba(123, 110, 246, 0.4)',
         text: '#7B6EF6',
         icon: '✨',
-        label: '奇妙',
+        label: t('emotionJoy'),
       };
     default:
       return {
@@ -69,7 +69,7 @@ const getEmotionStyles = (emotion: EmotionType) => {
         border: 'rgba(139, 130, 176, 0.4)',
         text: '#8B82B0',
         icon: '💭',
-        label: '中性',
+        label: t('emotionNeutral'),
       };
   }
 };
@@ -126,9 +126,7 @@ function DreamInputScreen({ navigation }: Props): React.JSX.Element {
   };
 
   const injectSmartTemplate = (): void => {
-    setDreamContent(
-      '我夢見深夜在空無一人的深海圖書館裡。高聳的书架上擺滿了閃出發光銀砂的書卷。我踩在軟綿綿的古老羊皮紙上，前方飄落下一隻巨大的淡藍色半透明發光蝴蝶，牠在空中繞了三圈後，落到了一本大厚書的中間，上面浮游著字樣：「一切過去的，都絕非徹底逝去」...'
-    );
+    setDreamContent(t('dreamInputSmartTemplate'));
   };
 
   const emotionsList: EmotionType[] = ['joy', 'calm', 'anxiety', 'nightmare', 'neutral'];
@@ -146,7 +144,7 @@ function DreamInputScreen({ navigation }: Props): React.JSX.Element {
           showsVerticalScrollIndicator={false}
         >
           <View style={styles.header}>
-            <Text style={styles.kicker}>✨ 深夜沉浸寫夢池</Text>
+            <Text style={styles.kicker}>✨ {t('dreamInputImmersiveKicker')}</Text>
             <Text style={styles.title}>{t('dreamInputTitle')}</Text>
             <Text style={styles.subtitle}>{t('dreamInputSubtitle')}</Text>
           </View>
@@ -176,7 +174,7 @@ function DreamInputScreen({ navigation }: Props): React.JSX.Element {
                 onPress={injectSmartTemplate}
                 style={styles.polishButton}
               >
-                <Text style={styles.polishButtonText}>🪄 智能注入</Text>
+                <Text style={styles.polishButtonText}>🪄 {t('dreamInputSmartInject')}</Text>
               </Pressable>
               
               <Text style={[styles.characterCount, { color: countTone }]}>
@@ -188,8 +186,8 @@ function DreamInputScreen({ navigation }: Props): React.JSX.Element {
           {/* Emotional selection chips */}
           <View style={styles.emotionSection}>
             <View style={styles.emotionHeader}>
-              <Text style={styles.emotionTitle}>🏷️ 昨夜夢境裡的主情緒是？</Text>
-              <Text style={styles.emotionMeta}>彈跳微動效</Text>
+              <Text style={styles.emotionTitle}>{t('dreamInputEmotionQuestion')}</Text>
+              <Text style={styles.emotionMeta}>{t('dreamInputEmotionMotion')}</Text>
             </View>
 
             <View style={styles.emotionGrid}>
@@ -244,7 +242,7 @@ function DreamInputScreen({ navigation }: Props): React.JSX.Element {
             ]}
           >
             <Text style={styles.primaryButtonText}>
-              🔮 引渡星宿 · 開始 AI 夢境解讀
+              {t('dreamInputPrimaryCta')}
             </Text>
           </AnimatedPressable>
 
@@ -252,7 +250,7 @@ function DreamInputScreen({ navigation }: Props): React.JSX.Element {
           <View style={styles.hintCard}>
             <Text style={styles.hintIcon}>ℹ️</Text>
             <Text style={styles.hintText}>
-              解讀基於 DreamNest 腦波圖譜（L1-L3三級架構）。模型不僅將通過大語言能力拆解意象，還會與您的自我夢庫做 RAG 向量匹配。
+              {t('dreamInputHint')}
             </Text>
           </View>
         </ScrollView>

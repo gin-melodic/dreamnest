@@ -35,7 +35,7 @@ const getEmotionStyles = (emotion: EmotionType) => {
         bg: 'rgba(224, 107, 139, 0.15)',
         border: 'rgba(224, 107, 139, 0.4)',
         text: '#E06B8B',
-        tag: '👿 夢魘',
+        tag: `👿 ${t('emotionNightmare')}`,
         colorCode: '#E06B8B',
       };
     case 'anxiety':
@@ -43,7 +43,7 @@ const getEmotionStyles = (emotion: EmotionType) => {
         bg: 'rgba(232, 155, 77, 0.15)',
         border: 'rgba(232, 155, 77, 0.4)',
         text: '#E89B4D',
-        tag: '🌪️ 焦慮',
+        tag: `🌪️ ${t('emotionAnxiety')}`,
         colorCode: '#E89B4D',
       };
     case 'calm':
@@ -51,7 +51,7 @@ const getEmotionStyles = (emotion: EmotionType) => {
         bg: 'rgba(91, 196, 160, 0.15)',
         border: 'rgba(91, 196, 160, 0.4)',
         text: '#5BC4A0',
-        tag: '🍃 平靜',
+        tag: `🍃 ${t('emotionCalm')}`,
         colorCode: '#5BC4A0',
       };
     case 'joy':
@@ -59,7 +59,7 @@ const getEmotionStyles = (emotion: EmotionType) => {
         bg: 'rgba(123, 110, 246, 0.15)',
         border: 'rgba(123, 110, 246, 0.4)',
         text: '#7B6EF6',
-        tag: '✨ 奇妙',
+        tag: `✨ ${t('emotionJoy')}`,
         colorCode: '#7B6EF6',
       };
     default:
@@ -67,14 +67,14 @@ const getEmotionStyles = (emotion: EmotionType) => {
         bg: 'rgba(139, 130, 176, 0.15)',
         border: 'rgba(139, 130, 176, 0.4)',
         text: '#8B82B0',
-        tag: '💭 中性',
+        tag: `💭 ${t('emotionNeutral')}`,
         colorCode: '#8B82B0',
       };
   }
 };
 
 function DreamResultScreen({ route, navigation }: Props): React.JSX.Element {
-  useI18n();
+  const language = useI18n();
   const { dreamContent } = route.params;
   
   // @ts-ignore (Retrieve selected emotion from params if present)
@@ -117,45 +117,62 @@ function DreamResultScreen({ route, navigation }: Props): React.JSX.Element {
 
   // Mock symbolism data matching the input emotion
   const generatedAnalysis = useMemo(() => {
+    const symbolJoiner = language === 'en' ? ', ' : '、';
+
     if (emotionParam === 'joy') {
       return {
-        title: '懸浮雲境與極光巨鯨的靈性洗禮',
-        theme: '水晶宮殿的靈性覺醒與心理探索邊界',
+        title: t('dreamResultAnalysisJoyTitle'),
+        theme: t('dreamResultAnalysisJoyTheme'),
         symbolism: [
-          { symbol: '水晶牆壁', meaning: '代表心靈深處的絕對透明性，暗示試圖探尋毫無掩飾的內在真實自我。' },
-          { symbol: '唱歌巨鯨', meaning: '海洋巨獸吟唱通常象徵古老的集體無意識，預示深層靈感或療癒正悄然萌發生根。' },
-          { symbol: '藍寶石鑰匙', meaning: '對自我心理鎖扣的終極命名權。藍色映射的是理性、智慧與深層靈感通道。' },
-          { symbol: '階梯墜落', meaning: '驚醒的催化劑，往往來自超高腦波轉換。這是一種自發性的機體預警機制，保護不被夢境過深吞噬。' }
+          { symbol: t('dreamResultAnalysisJoySymbolOne'), meaning: t('dreamResultAnalysisJoyMeaningOne') },
+          { symbol: t('dreamResultAnalysisJoySymbolTwo'), meaning: t('dreamResultAnalysisJoyMeaningTwo') },
+          { symbol: t('dreamResultAnalysisJoySymbolThree'), meaning: t('dreamResultAnalysisJoyMeaningThree') },
+          { symbol: t('dreamResultAnalysisJoySymbolFour'), meaning: t('dreamResultAnalysisJoyMeaningFour') },
         ],
-        keywords: ['雲境宮殿', '巨鯨', '星紗人'],
+        keywords: [
+          t('dreamResultAnalysisJoyKeywordOne'),
+          t('dreamResultAnalysisJoyKeywordTwo'),
+          t('dreamResultAnalysisJoyKeywordThree'),
+        ],
+        symbolJoiner,
         confidence: 94,
       };
     } else if (emotionParam === 'calm') {
       return {
-        title: '深海溫室與發光植物的寧靜避難所',
-        theme: '潛意識防禦機制的消解與生命本源能量的自我修復',
+        title: t('dreamResultAnalysisCalmTitle'),
+        theme: t('dreamResultAnalysisCalmTheme'),
         symbolism: [
-          { symbol: '深海玻璃溫室', meaning: '象徵溫柔安全的自我隔離邊界，代表內心深處渴望遠離喧囂的寧靜港灣。' },
-          { symbol: '發光植物', meaning: '心靈深處悄然復甦的生命直覺，預示著被忽視的潛能正開始為你指明方向。' },
-          { symbol: '漫步的古鯨', meaning: '象徵靈魂深處的睿智守護者，它無聲的游弋映射著你情緒波瀾的逐步平復。' }
+          { symbol: t('dreamResultAnalysisCalmSymbolOne'), meaning: t('dreamResultAnalysisCalmMeaningOne') },
+          { symbol: t('dreamResultAnalysisCalmSymbolTwo'), meaning: t('dreamResultAnalysisCalmMeaningTwo') },
+          { symbol: t('dreamResultAnalysisCalmSymbolThree'), meaning: t('dreamResultAnalysisCalmMeaningThree') },
         ],
-        keywords: ['海底溫室', '發光植物', '古鯨'],
+        keywords: [
+          t('dreamResultAnalysisCalmKeywordOne'),
+          t('dreamResultAnalysisCalmKeywordTwo'),
+          t('dreamResultAnalysisCalmKeywordThree'),
+        ],
+        symbolJoiner,
         confidence: 96,
       };
     } else {
       return {
-        title: '迷失鐘錶與倒轉時空的心理象徵',
-        theme: '對現實秩序失控的焦慮表徵與自性整合的機體自愈',
+        title: t('dreamResultAnalysisDefaultTitle'),
+        theme: t('dreamResultAnalysisDefaultTheme'),
         symbolism: [
-          { symbol: '倒轉鐘錶', meaning: '代表對時間流逝與掌控力丧失的焦慮，折射出生活節奏可能出現的混亂感。' },
-          { symbol: '迷失深淵', meaning: '象徵短暫迷失在集體無意識中，提示需要審視在清醒世界裡被壓抑的焦慮。' },
-          { symbol: '微弱蝴蝶', meaning: '指引心靈復歸的微光，象徵雖然處於秩序失控，但重塑核心秩序的動力並未熄滅。' }
+          { symbol: t('dreamResultAnalysisDefaultSymbolOne'), meaning: t('dreamResultAnalysisDefaultMeaningOne') },
+          { symbol: t('dreamResultAnalysisDefaultSymbolTwo'), meaning: t('dreamResultAnalysisDefaultMeaningTwo') },
+          { symbol: t('dreamResultAnalysisDefaultSymbolThree'), meaning: t('dreamResultAnalysisDefaultMeaningThree') },
         ],
-        keywords: ['迷失', '鐘錶倒轉', '微光蝴蝶'],
+        keywords: [
+          t('dreamResultAnalysisDefaultKeywordOne'),
+          t('dreamResultAnalysisDefaultKeywordTwo'),
+          t('dreamResultAnalysisDefaultKeywordThree'),
+        ],
+        symbolJoiner,
         confidence: 90,
       };
     }
-  }, [emotionParam]);
+  }, [emotionParam, language]);
 
   // Client-Side Simulated SSE Streaming
   useEffect(() => {
@@ -170,9 +187,9 @@ function DreamResultScreen({ route, navigation }: Props): React.JSX.Element {
     const t1 = setTimeout(() => {
       setStreamProgress(1);
       progressBarWidth.value = withTiming(25, { duration: 600 });
-      setStreamText('❖ [L1 引擎] 捕獲模式錨點：分析核心意象 ' + 
-        generatedAnalysis.symbolism.map((s: { symbol: string }) => `[${s.symbol}]`).join('、') + 
-        `... 匹配機制契合百分比: ${generatedAnalysis.confidence}%\n`
+      setStreamText(t('dreamResultStreamL1Prefix') + 
+        generatedAnalysis.symbolism.map((s: { symbol: string }) => `[${s.symbol}]`).join(generatedAnalysis.symbolJoiner) + 
+        `${t('dreamResultStreamL1Middle')}${generatedAnalysis.confidence}${t('dreamResultStreamL1Suffix')}`
       );
     }, 400);
 
@@ -180,19 +197,19 @@ function DreamResultScreen({ route, navigation }: Props): React.JSX.Element {
     const t2 = setTimeout(() => {
       setStreamProgress(2);
       progressBarWidth.value = withTiming(50, { duration: 700 });
-      setStreamText(prev => prev + '❖ [L2 神經] 初階神經網路腦區解波完成：捕獲情緒峰值：平穩喜悅中夾雜瞬時驚亂。自我狀態：快速眼動期 (REM)...\n');
+      setStreamText(prev => prev + t('dreamResultStreamL2'));
     }, 1100);
 
     // Step 3: L3 knowledge graph (1900ms)
     const t3 = setTimeout(() => {
       setStreamProgress(3);
       progressBarWidth.value = withTiming(75, { duration: 800 });
-      setStreamText(prev => prev + '❖ [L3 甲骨] 正在啟動 DreamNest 夢境知識圖譜核心關聯器（覆蓋 12,000+ 星網心靈節點）...\n\n');
+      setStreamText(prev => prev + t('dreamResultStreamL3'));
     }, 1900);
 
     // Step 4: Stream text rendering of theme (2800ms)
     let interval: any;
-    const textToAnimate = `【夢境主體核心】：${generatedAnalysis.theme}\n\n【夢境意象剝離】：\n`;
+    const textToAnimate = `${t('dreamResultStreamThemeLabel')}${generatedAnalysis.theme}\n\n${t('dreamResultStreamSymbolsLabel')}\n`;
     
     const t4 = setTimeout(() => {
       setStreamProgress(4);
@@ -245,7 +262,7 @@ function DreamResultScreen({ route, navigation }: Props): React.JSX.Element {
         interpretationKey: generatedAnalysis.theme as any,
         emotionKey: emotionParam as any,
         emotionColor: emoStyle.colorCode,
-        createdAtKey: '今天' as any,
+        createdAtKey: 'commonToday' as any,
         // Extra payload metadata matching PhoneSimulator
         aiKeywords: generatedAnalysis.keywords,
         symbolism: generatedAnalysis.symbolism,
@@ -274,18 +291,18 @@ function DreamResultScreen({ route, navigation }: Props): React.JSX.Element {
         showsVerticalScrollIndicator={false}
       >
         <View style={styles.header}>
-          <Text style={styles.kicker}>✨ AI 星軌多維推導</Text>
+          <Text style={styles.kicker}>✨ {t('dreamResultImmersiveKicker')}</Text>
           <Text style={styles.title}>{t('dreamResultTitle')}</Text>
           <Text style={styles.subtitle}>
-            {isStreaming ? '星軌連通解析中，請保持呼吸安穩...' : 'RAG 星軌解析連通成功'}
+            {isStreaming ? t('dreamResultStreamingSubtitle') : t('dreamResultCompleteSubtitle')}
           </Text>
         </View>
 
         {/* Stepper tracker (PhoneSimulator logic) */}
         <View style={styles.stepperCard}>
           <View style={styles.stepperHeader}>
-            <Text style={styles.stepperHeaderText}>三級夢魂神經網路算力調度：</Text>
-            {isStreaming && <Text style={styles.stepperStatusText}>流式接收中...</Text>}
+            <Text style={styles.stepperHeaderText}>{t('dreamResultStepperTitle')}</Text>
+            {isStreaming && <Text style={styles.stepperStatusText}>{t('dreamResultStreamingStatus')}</Text>}
           </View>
           
           <View style={styles.stepperBubblesRow}>
@@ -303,7 +320,7 @@ function DreamResultScreen({ route, navigation }: Props): React.JSX.Element {
                   {streamProgress >= 2 ? '✓' : 'L1'}
                 </Text>
               </View>
-              <Text style={styles.bubbleLabel}>意象匹配</Text>
+              <Text style={styles.bubbleLabel}>{t('dreamResultStepImageMatch')}</Text>
             </View>
 
             {/* Bubble 2: L2 */}
@@ -316,7 +333,7 @@ function DreamResultScreen({ route, navigation }: Props): React.JSX.Element {
                   {streamProgress >= 3 ? '✓' : 'L2'}
                 </Text>
               </View>
-              <Text style={styles.bubbleLabel}>腦波分析</Text>
+              <Text style={styles.bubbleLabel}>{t('dreamResultStepBrainwave')}</Text>
             </View>
 
             {/* Bubble 3: L3 */}
@@ -329,7 +346,7 @@ function DreamResultScreen({ route, navigation }: Props): React.JSX.Element {
                   {streamProgress >= 4 ? '✓' : 'L3'}
                 </Text>
               </View>
-              <Text style={styles.bubbleLabel}>圖譜對齊</Text>
+              <Text style={styles.bubbleLabel}>{t('dreamResultStepGraphAlign')}</Text>
             </View>
 
             {/* Bubble 4: Done */}
@@ -345,7 +362,7 @@ function DreamResultScreen({ route, navigation }: Props): React.JSX.Element {
                   {(streamProgress >= 4 && !isStreaming) ? '✓' : 'Done'}
                 </Text>
               </View>
-              <Text style={styles.bubbleLabel}>解讀就位</Text>
+              <Text style={styles.bubbleLabel}>{t('dreamResultStepDone')}</Text>
             </View>
           </View>
         </View>
@@ -353,14 +370,14 @@ function DreamResultScreen({ route, navigation }: Props): React.JSX.Element {
         {/* Score Dial & Theme (Floating cards) */}
         <View style={styles.metersRow}>
           <View style={styles.meterCardSmall}>
-            <Text style={styles.meterSmallLabel}>夢境明晰度</Text>
+            <Text style={styles.meterSmallLabel}>{t('dreamResultLucidityLabel')}</Text>
             <Text style={[styles.meterSmallValue, { color: emoStyle.colorCode }]}>
-              ✨ 高 (HIGH)
+              {t('dreamResultLucidityValue')}
             </Text>
           </View>
           
           <View style={styles.meterCardLarge}>
-            <Text style={styles.meterLargeLabel}>潛意識置信水準</Text>
+            <Text style={styles.meterLargeLabel}>{t('dreamResultConfidenceLabel')}</Text>
             <View style={styles.progressBarBg}>
               <View
                 style={[
@@ -373,7 +390,7 @@ function DreamResultScreen({ route, navigation }: Props): React.JSX.Element {
               />
             </View>
             <Text style={[styles.meterLargeValue, { color: COLORS.success }]}>
-              {confidenceDial}% (極強配比)
+              {confidenceDial}% {t('dreamResultConfidenceSuffix')}
             </Text>
           </View>
         </View>
@@ -382,17 +399,17 @@ function DreamResultScreen({ route, navigation }: Props): React.JSX.Element {
         <View style={styles.terminalPanel}>
           <View style={styles.terminalHeader}>
             <View style={[styles.terminalPulseDot, { backgroundColor: emoStyle.colorCode }]} />
-            <Text style={styles.terminalHeaderText}>❖ INTERPRETER CHRONICLE:</Text>
+            <Text style={styles.terminalHeaderText}>{t('dreamResultTerminalHeader')}</Text>
           </View>
           
           <Text style={styles.terminalText}>
-            {streamText || '❖ 正在引渡昨夜的星雲，請維持呼吸平順。腦電波 REM 模型序列正在連接...'}
+            {streamText || t('dreamResultTerminalPlaceholder')}
           </Text>
 
           {/* Symbolism breakdown revealed one by one */}
           {!isStreaming && (
             <View style={styles.symbolsSection}>
-              <Text style={styles.symbolsTitle}>🔍 核心自性意象剝離</Text>
+              <Text style={styles.symbolsTitle}>{t('dreamResultSymbolsTitle')}</Text>
               
               <View style={styles.symbolsList}>
                 {generatedAnalysis.symbolism.map((sym: { symbol: string; meaning: string }, idx: number) => {
@@ -425,16 +442,16 @@ function DreamResultScreen({ route, navigation }: Props): React.JSX.Element {
             <View style={styles.premiumBanner}>
               <View style={styles.premiumLeft}>
                 <View style={styles.premiumBadgeRow}>
-                  <Text style={styles.premiumBadgeText}>L3 占星學者深度腦圖</Text>
+                  <Text style={styles.premiumBadgeText}>{t('dreamResultPremiumTitle')}</Text>
                   <Text style={styles.premiumLockEmoji}>🔒</Text>
                 </View>
                 <Text style={styles.premiumSubtitle}>
-                  採用主力百億LLM深度推演夢境在心理治療中與當前執念的深層糾結，提供專屬睡前解憂音頻。
+                  {t('dreamResultPremiumSubtitle')}
                 </Text>
               </View>
               
               <Pressable accessibilityRole="button" style={styles.premiumButton}>
-                <Text style={styles.premiumButtonText}>解鎖 29 鑽</Text>
+                <Text style={styles.premiumButtonText}>{t('dreamResultPremiumButton')}</Text>
               </Pressable>
             </View>
 
@@ -447,7 +464,7 @@ function DreamResultScreen({ route, navigation }: Props): React.JSX.Element {
               style={[styles.saveButton, animatedButtonStyle]}
             >
               <Text style={styles.saveIcon}>✓</Text>
-              <Text style={styles.saveButtonText}>儲存至夢境日記本並結束</Text>
+              <Text style={styles.saveButtonText}>{t('dreamResultSaveButton')}</Text>
             </AnimatedPressable>
           </Animated.View>
         )}

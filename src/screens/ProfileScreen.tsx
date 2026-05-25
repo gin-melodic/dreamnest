@@ -1,3 +1,5 @@
+import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { useNavigation } from '@react-navigation/native';
 import React, { useState, useEffect } from 'react';
 import {
   Pressable,
@@ -17,37 +19,16 @@ import Animated, {
 } from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-import { setLanguage, t, useI18n } from '../lib/i18n';
-import { useAuthStore } from '../store/authStore';
-import type { LocaleKeys, SupportedLanguage } from '../types/i18n';
+import { t, useI18n } from '../lib/i18n';
+import type { RootStackParamList } from '../navigation/AppNavigator';
 import { COLORS, TYPOGRAPHY } from '../types/theme';
 
 type ArchetypeKey = 'self' | 'persona' | 'shadow' | 'anima' | 'sage';
 
-// type Props = {
-//   onNavigateToTab?: (tab: 'Home' | 'Journal' | 'Profile') => void;
-// };
-
-const SETTINGS = [
-  { labelKey: 'profileSettingAccount', valueKey: 'profileSettingAccountValue' },
-  { labelKey: 'profileSettingStorage', valueKey: 'profileSettingStorageValue' },
-  { labelKey: 'profileSettingPrivacy', valueKey: 'profileSettingPrivacyValue' },
-] as const;
-
-const LANGUAGE_OPTIONS: Array<{
-  value: SupportedLanguage;
-  labelKey: keyof LocaleKeys;
-}> = [
-  { value: 'en', labelKey: 'profileLanguageEnglish' },
-  { value: 'zh-Hant', labelKey: 'profileLanguageTraditionalChinese' },
-  { value: 'zh-Hans', labelKey: 'profileLanguageSimplifiedChinese' },
-];
-
 function ProfileScreen(): React.JSX.Element {
-  const language = useI18n();
-  const user = useAuthStore(state => state.user);
-  const backendToken = useAuthStore(state => state.backendToken);
-  const clear = useAuthStore(state => state.clear);
+  useI18n();
+  const navigation =
+    useNavigation<NativeStackNavigationProp<RootStackParamList>>();
 
   // Selected Jungian Archetype
   const [selectedArchetype, setSelectedArchetype] = useState<ArchetypeKey>('self');
@@ -89,41 +70,41 @@ function ProfileScreen(): React.JSX.Element {
   // Archetypes definitions
   const archetypes = {
     self: {
-      title: "自性核心 (The Self)",
+      title: t('profileArchetypeSelfTitle'),
       ratio: "84%",
-      text: "心靈結構的中心與整合起點。在您的夢境中常以「黃金巨鹿」、「巨鯨」等強大溫柔守護者或宿命神兆投影。代表您正逐漸調和外在面具與內在本能，心靈秩序高度平衡。",
+      text: t('profileArchetypeSelfText'),
       color: "#F0A86E",
       border: "rgba(240, 168, 110, 0.4)",
       bg: "rgba(240, 168, 110, 0.08)",
     },
     persona: {
-      title: "人格面具 (Persona)",
+      title: t('profileArchetypePersonaTitle'),
       ratio: "65%",
-      text: "適應外界與社會社交的防禦外殼。常用夢中的「制服」、「面具」、「舞臺」或「水晶牆壁」安全邊界來體現。當前指標中等，反映您在社交中既能良好應對，又未迷失真我。",
+      text: t('profileArchetypePersonaText'),
       color: "#7B6EF6",
       border: "rgba(123, 110, 246, 0.4)",
       bg: "rgba(123, 110, 246, 0.08)",
     },
     shadow: {
-      title: "心理陰影 (The Shadow)",
+      title: t('profileArchetypeShadowTitle'),
       ratio: "48%",
-      text: "潛意識中被理性、文明排斥壓抑的本能或恐懼。在夢中表現為「追趕的黑影子」、「失去扶手的險峻階梯」或「深淵赤紅崩塌」。接納陰影被視為自我強大創造力的源泉。",
+      text: t('profileArchetypeShadowText'),
       color: "#E06B8B",
       border: "rgba(224, 107, 139, 0.4)",
       bg: "rgba(224, 107, 139, 0.08)",
     },
     anima: {
-      title: "阿尼瑪 (Anima)",
+      title: t('profileArchetypeAnimaTitle'),
       ratio: "72%",
-      text: "生命中陰陽和能量共振的安全通路。在梦中，常被隱喻為「身披星紗的指引女神」或「深海玻璃溫室中目標深邃的同伴」。驅策著您的靈性、美學感受能力向外舒展開展。",
+      text: t('profileArchetypeAnimaText'),
       color: "#5BC4A0",
       border: "rgba(91, 196, 160, 0.4)",
       bg: "rgba(91, 196, 160, 0.08)",
     },
     sage: {
-      title: "智慧智者 (The Sage)",
+      title: t('profileArchetypeSageTitle'),
       ratio: "58%",
-      text: "永恆本源與精神指引的代名詞。在近期梦境中多以「古老浩瀚圖書館」、「淡藍色發光蝴蝶」或「記住潮汐方向」的聲音印刻。提示您近期重大決策時可多信任內在直覺。",
+      text: t('profileArchetypeSageText'),
       color: "#E89B4D",
       border: "rgba(232, 155, 77, 0.4)",
       bg: "rgba(232, 155, 77, 0.08)",
@@ -131,6 +112,9 @@ function ProfileScreen(): React.JSX.Element {
   };
 
   const activeA = archetypes[selectedArchetype];
+  const handleOpenSettings = (): void => {
+    navigation.navigate('Settings');
+  };
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -140,12 +124,17 @@ function ProfileScreen(): React.JSX.Element {
         showsVerticalScrollIndicator={false}
       >
         <View style={styles.header}>
-          <Text style={styles.kicker}>心理學自性中心</Text>
+          <Text style={styles.kicker}>{t('profileMandalaKicker')}</Text>
           <View style={styles.brandRow}>
-            <Text style={styles.title}>榮格心靈整合盤</Text>
-            <View style={styles.versionBadge}>
-              <Text style={styles.versionText}>PSI v1.2</Text>
-            </View>
+            <Text style={styles.title}>{t('profileMandalaTitle')}</Text>
+            <Pressable
+              accessibilityLabel={t('commonSettings')}
+              accessibilityRole="button"
+              onPress={handleOpenSettings}
+              style={styles.settingsButton}
+            >
+              <Text style={styles.settingsButtonIcon}>⚙︎</Text>
+            </Pressable>
           </View>
         </View>
 
@@ -169,7 +158,7 @@ function ProfileScreen(): React.JSX.Element {
             >
               <Text style={styles.nodeEmoji}>🎭</Text>
             </Pressable>
-            
+
             {/* Shadow Node */}
             <Pressable
               accessibilityRole="button"
@@ -210,7 +199,7 @@ function ProfileScreen(): React.JSX.Element {
             </Pressable>
           </View>
 
-          {/* Glowing central Miracle奇点 orb */}
+          {/* Glowing central mandala core orb */}
           <Animated.View style={[styles.mandalaCore, animatedCoreStyle]}>
             <View style={styles.mandalaCoreInner}>
               <Text style={styles.coreSparkle}>✨</Text>
@@ -224,35 +213,35 @@ function ProfileScreen(): React.JSX.Element {
           <View style={styles.integrationHeader}>
             <View style={styles.coherenceRow}>
               <View style={[styles.coherenceIndicatorDot, { backgroundColor: COLORS.success }]} />
-              <Text style={styles.integrationLabel}>潛意識自我統合比例 (PSI Coherence)</Text>
+              <Text style={styles.integrationLabel}>{t('profileIntegrationLabel')}</Text>
             </View>
-            <Text style={[styles.integrationValue, { color: COLORS.success }]}>偏高 (HIGH)</Text>
+            <Text style={[styles.integrationValue, { color: COLORS.success }]}>{t('profileIntegrationValue')}</Text>
           </View>
-          
+
           <View style={styles.integrationBarBg}>
             <View style={[styles.integrationBarFill, { width: '84%' }]} />
           </View>
-          
+
           <Text style={styles.integrationDescription}>
-            您的夢絮在 RAG 知識網格中展示出較低的內部衝突。智慧精靈（阿尼瑪）引渡良好，焦慮投射逐步下降，內在自性核心（Self）正在重塑、聚合中。
+            {t('profileIntegrationDescription')}
           </Text>
         </View>
 
         {/* Archetypes selectors and details breakout */}
         <View style={styles.archetypeSection}>
           <View style={styles.sectionHeader}>
-            <Text style={styles.sectionTitle}>✦ 點選探秘心靈原型</Text>
-            <Text style={styles.sectionMeta}>榮格潛意識對齊</Text>
+            <Text style={styles.sectionTitle}>{t('profileArchetypeSectionTitle')}</Text>
+            <Text style={styles.sectionMeta}>{t('profileArchetypeSectionMeta')}</Text>
           </View>
 
           {/* Tab Selector buttons */}
           <View style={styles.archetypeTabsGrid}>
             {[
-              { key: 'self', label: '自性', emoji: '✨' },
-              { key: 'persona', label: '人格', emoji: '🎭' },
-              { key: 'shadow', label: '陰影', emoji: '👿' },
-              { key: 'anima', label: '阿尼', emoji: '🍃' },
-              { key: 'sage', label: '智者', emoji: '🦉' },
+              { key: 'self', label: t('profileArchetypeSelfTab'), emoji: '✨' },
+              { key: 'persona', label: t('profileArchetypePersonaTab'), emoji: '🎭' },
+              { key: 'shadow', label: t('profileArchetypeShadowTab'), emoji: '👿' },
+              { key: 'anima', label: t('profileArchetypeAnimaTab'), emoji: '🍃' },
+              { key: 'sage', label: t('profileArchetypeSageTab'), emoji: '🦉' },
             ].map(tab => (
               <Pressable
                 accessibilityRole="button"
@@ -280,7 +269,7 @@ function ProfileScreen(): React.JSX.Element {
               </Text>
               <View style={styles.detailCardBadge}>
                 <Text style={[styles.detailCardBadgeText, { color: activeA.color }]}>
-                  潛意識占比 {activeA.ratio}
+                  {t('profileArchetypeRatioPrefix')} {activeA.ratio}
                 </Text>
               </View>
             </View>
@@ -288,74 +277,6 @@ function ProfileScreen(): React.JSX.Element {
           </View>
         </View>
 
-        {/* Separator line */}
-        <View style={styles.divider} />
-
-        {/* Account Identity details panel */}
-        <View style={styles.identityCard}>
-          <View style={styles.avatar}>
-            <Text style={styles.avatarText}>
-              {(user?.email ?? 'D').charAt(0).toUpperCase()}
-            </Text>
-          </View>
-          <View style={styles.identityText}>
-            <Text style={styles.email}>
-              {user?.email ?? t('profileNotSignedIn')}
-            </Text>
-            <Text style={styles.tokenStatus}>
-              {backendToken
-                ? t('profileBackendTokenStored')
-                : t('profileNoBackendToken')}
-            </Text>
-          </View>
-        </View>
-
-        {/* Settings configurations */}
-        <View style={styles.settingsPanel}>
-          {SETTINGS.map(setting => (
-            <View key={setting.labelKey} style={styles.settingRow}>
-              <Text style={styles.settingLabel}>{t(setting.labelKey)}</Text>
-              <Text style={styles.settingValue}>{t(setting.valueKey)}</Text>
-            </View>
-          ))}
-        </View>
-
-        {/* Translation locales selector */}
-        <View style={styles.languagePanel}>
-          <Text style={styles.languageTitle}>{t('profileLanguageTitle')}</Text>
-          {LANGUAGE_OPTIONS.map(option => {
-            const isSelected = language === option.value;
-
-            return (
-              <Pressable
-                accessibilityRole="radio"
-                accessibilityState={{ checked: isSelected }}
-                key={option.value}
-                onPress={() => setLanguage(option.value)}
-                style={styles.languageOption}
-              >
-                <View
-                  style={[
-                    styles.radioOuter,
-                    isSelected && styles.radioOuterSelected,
-                  ]}
-                >
-                  {isSelected ? <View style={styles.radioInner} /> : null}
-                </View>
-                <Text style={styles.languageLabel}>{t(option.labelKey)}</Text>
-              </Pressable>
-            );
-          })}
-        </View>
-
-        {/* Premium sign out button */}
-        <Pressable
-          accessibilityRole="button"
-          onPress={clear}
-          style={styles.signOutButton}
-        >
-          <Text style={styles.signOutText}>{t('profileSignOut')}</Text>
-        </Pressable>
       </ScrollView>
     </SafeAreaView>
   );
@@ -391,17 +312,18 @@ const styles = StyleSheet.create({
     fontWeight: '800',
     color: COLORS.textPrimary,
   },
-  versionBadge: {
+  settingsButton: {
+    alignItems: 'center',
     backgroundColor: `${COLORS.primaryAccent}26`,
     borderColor: `${COLORS.primaryAccent}40`,
     borderWidth: 1,
-    paddingHorizontal: 8,
-    paddingVertical: 3,
+    height: 36,
+    justifyContent: 'center',
     borderRadius: 8,
+    width: 36,
   },
-  versionText: {
-    fontSize: 9,
-    fontFamily: 'monospace',
+  settingsButtonIcon: {
+    fontSize: 18,
     color: COLORS.primaryAccent,
     fontWeight: '700',
   },
@@ -634,129 +556,6 @@ const styles = StyleSheet.create({
     fontSize: 10.5,
     color: COLORS.textPrimary,
     lineHeight: 16,
-  },
-  divider: {
-    height: 1,
-    backgroundColor: COLORS.surface2,
-    marginVertical: 14,
-    opacity: 0.5,
-  },
-  identityCard: {
-    alignItems: 'center',
-    backgroundColor: COLORS.surface,
-    borderColor: COLORS.surface2,
-    borderRadius: 20,
-    borderWidth: 1,
-    flexDirection: 'row',
-    padding: 16,
-    marginBottom: 16,
-  },
-  avatar: {
-    alignItems: 'center',
-    backgroundColor: COLORS.primaryAccent,
-    borderRadius: 22,
-    height: 44,
-    justifyContent: 'center',
-    marginRight: 12,
-    width: 44,
-  },
-  avatarText: {
-    fontSize: 16,
-    fontWeight: '800',
-    color: COLORS.textPrimary,
-  },
-  identityText: {
-    flex: 1,
-  },
-  email: {
-    ...TYPOGRAPHY.secondary,
-    color: COLORS.textPrimary,
-    fontWeight: '700',
-  },
-  tokenStatus: {
-    fontSize: 10,
-    color: COLORS.textMuted,
-    marginTop: 2,
-  },
-  settingsPanel: {
-    backgroundColor: COLORS.surface,
-    borderColor: COLORS.surface2,
-    borderRadius: 20,
-    borderWidth: 1,
-    marginBottom: 16,
-    paddingHorizontal: 16,
-  },
-  settingRow: {
-    borderBottomColor: COLORS.surface2,
-    borderBottomWidth: 1,
-    paddingVertical: 14,
-  },
-  settingLabel: {
-    fontSize: 11,
-    color: COLORS.textMuted,
-  },
-  settingValue: {
-    ...TYPOGRAPHY.secondary,
-    color: COLORS.textPrimary,
-    marginTop: 2,
-  },
-  languagePanel: {
-    backgroundColor: COLORS.surface,
-    borderColor: COLORS.surface2,
-    borderRadius: 20,
-    borderWidth: 1,
-    marginBottom: 24,
-    padding: 16,
-  },
-  languageTitle: {
-    fontSize: 11,
-    color: COLORS.textMuted,
-    marginBottom: 10,
-  },
-  languageOption: {
-    alignItems: 'center',
-    flexDirection: 'row',
-    minHeight: 40,
-  },
-  radioOuter: {
-    alignItems: 'center',
-    borderColor: COLORS.textFaint,
-    borderRadius: 9,
-    borderWidth: 1,
-    height: 18,
-    justifyContent: 'center',
-    marginRight: 10,
-    width: 18,
-  },
-  radioOuterSelected: {
-    borderColor: COLORS.primaryAccent,
-  },
-  radioInner: {
-    backgroundColor: COLORS.primaryAccent,
-    borderRadius: 4,
-    height: 8,
-    width: 8,
-  },
-  languageLabel: {
-    ...TYPOGRAPHY.secondary,
-    color: COLORS.textPrimary,
-  },
-  signOutButton: {
-    alignItems: 'center',
-    borderColor: COLORS.error,
-    borderRadius: 16,
-    borderWidth: 1,
-    justifyContent: 'center',
-    minHeight: 52,
-    shadowColor: COLORS.error,
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.1,
-    shadowRadius: 6,
-  },
-  signOutText: {
-    ...TYPOGRAPHY.secondary,
-    color: COLORS.error,
-    fontWeight: '700',
   },
 });
 

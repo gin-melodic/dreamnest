@@ -4,6 +4,9 @@ export const en: LocaleKeys = {
   appName: 'DreamNest',
   commonBack: 'Back',
   commonClose: 'Close',
+  commonSettings: 'Open settings',
+  commonHigh: 'High',
+  commonToday: 'Today',
   tabHome: 'Home',
   tabJournal: 'Journal',
   tabProfile: 'Profile',
@@ -21,6 +24,7 @@ export const en: LocaleKeys = {
     'The Supabase exchange will attach here; this UI path keeps the MVP navigable while backend auth is finalized.',
   homeTitle: "Tonight's symbols are waiting.",
   homeStreakLabel: 'day streak',
+  homeDateSuffix: 'Dawn',
   homeHeroEyebrow: 'Private star-journal',
   homeHeroTitle: 'Capture the dream before it fades.',
   homeHeroBody:
@@ -28,6 +32,20 @@ export const en: LocaleKeys = {
   homeAnalyzeButton: 'Analyze a Dream',
   homeRecentTitle: 'Recent dreams',
   homeRecentMeta: 'Last 10 cached locally',
+  homeCtaTag: 'AI REM recorder',
+  homeCtaTitle: 'Record last night before it scatters?',
+  homeCtaSubtitle:
+    'Decode it through a three-layer dream network and reveal deeper patterns of the self.',
+  homeCtaFooter: 'Start capturing the dream',
+  homeRecommendationLabel: "Today's recommended reading",
+  homeRecommendationScore: 'Dream self RAG index 92%',
+  homeRecommendationEmotionPrefix: 'Emotion:',
+  homeRecommendationTier: 'L3 advanced analysis ›',
+  homeChartTitle: 'Subconscious emotional waves over 7 days',
+  homeChartMeta: 'Mostly calm and wonder',
+  homeChartBadge: 'AI match: 88%',
+  homeCarouselTitle: 'Dream echoes · archive',
+  homeLucidityHigh: 'High clarity',
   dreamOneTitle: 'Moonlit garden',
   dreamOneDate: 'Today',
   dreamOneEmotion: 'Wonder',
@@ -54,6 +72,35 @@ export const en: LocaleKeys = {
   profileTitle: 'Your quiet corner',
   profileSubtitle:
     'Manage the account and local session that protect your dream journal.',
+  profileMandalaKicker: 'Psychology self center',
+  profileMandalaTitle: 'Jungian psyche mandala',
+  profileIntegrationLabel: 'Subconscious self-integration ratio (PSI Coherence)',
+  profileIntegrationValue: 'Elevated (HIGH)',
+  profileIntegrationDescription:
+    'Your dream fragments show low internal conflict in the RAG knowledge grid. The inner guide is carrying well, anxious projections are easing, and the Self is gathering into a steadier center.',
+  profileArchetypeSectionTitle: '✦ Tap to explore psyche archetypes',
+  profileArchetypeSectionMeta: 'Jungian subconscious alignment',
+  profileArchetypeSelfTab: 'Self',
+  profileArchetypePersonaTab: 'Persona',
+  profileArchetypeShadowTab: 'Shadow',
+  profileArchetypeAnimaTab: 'Anima',
+  profileArchetypeSageTab: 'Sage',
+  profileArchetypeSelfTitle: 'The Self',
+  profileArchetypeSelfText:
+    'The center of psychic structure and integration. In your dreams it often appears as a golden guardian, great whale, or other powerful gentle omen, suggesting a growing balance between outer roles and inner instinct.',
+  profileArchetypePersonaTitle: 'Persona',
+  profileArchetypePersonaText:
+    'The adaptive shell used in social life. Uniforms, masks, stages, or crystalline boundaries may show this pattern. The current index is moderate, reflecting flexible social response without losing the inner self.',
+  profileArchetypeShadowTitle: 'The Shadow',
+  profileArchetypeShadowText:
+    'The instincts and fears pushed away by reason or convention. Chasing shadows, broken stairs, or red collapsing depths can point here. Accepting the shadow can become a source of creative strength.',
+  profileArchetypeAnimaTitle: 'Anima',
+  profileArchetypeAnimaText:
+    'A safe channel for inner polarity and resonance. In dreams it may appear as a star-veiled guide or a companion in a deep-sea greenhouse, moving spiritual and aesthetic sensitivity outward.',
+  profileArchetypeSageTitle: 'The Sage',
+  profileArchetypeSageText:
+    'A figure of enduring source and spiritual guidance. Recent dreams may cast it as an ancient library, blue glowing butterfly, or a voice remembering the tide, nudging you to trust intuition in major choices.',
+  profileArchetypeRatioPrefix: 'Subconscious share',
   profileNotSignedIn: 'Not signed in',
   profileBackendTokenStored: 'Backend token stored',
   profileNoBackendToken: 'No backend token',
@@ -68,7 +115,9 @@ export const en: LocaleKeys = {
   profileLanguageTraditionalChinese: '繁體中文',
   profileLanguageSimplifiedChinese: '简体中文',
   profileSignOut: 'Sign Out',
+  settingsTitle: 'Settings',
   dreamInputKicker: 'Dream input',
+  dreamInputImmersiveKicker: 'Late-night immersive dream pool',
   dreamInputTitle: 'Tell the dream in your own words.',
   dreamInputSubtitle:
     'Add the places, people, symbols, and the feeling that lingered after waking.',
@@ -79,10 +128,99 @@ export const en: LocaleKeys = {
   dreamInputSuggestionAppear: 'Who or what appeared?',
   dreamInputSuggestionFeeling: 'What feeling stayed after waking?',
   dreamInputAnalyze: 'Analyze',
+  dreamInputSmartInject: 'Smart fill',
+  dreamInputSmartTemplate:
+    'I dreamed I was in an empty deep-sea library at night. Towering shelves were filled with scrolls glowing with silver dust. I stepped across soft ancient parchment, and a huge translucent pale-blue butterfly drifted down, circled three times, then landed in the middle of a heavy book. Words floated above it: "Everything past is never entirely gone"...',
+  dreamInputEmotionQuestion: '🏷️ What was the main emotion in last night\'s dream?',
+  dreamInputEmotionMotion: 'Bouncy motion',
+  dreamInputPrimaryCta: '🔮 Begin AI dream reading',
+  dreamInputHint:
+    'The reading is based on the DreamNest brainwave graph (L1-L3 architecture). The model breaks down imagery and matches it against your personal dream library with RAG vectors.',
+  emotionJoy: 'Wonder',
+  emotionCalm: 'Calm',
+  emotionAnxiety: 'Anxiety',
+  emotionNightmare: 'Nightmare',
+  emotionNeutral: 'Neutral',
   dreamResultKicker: 'AI interpretation',
+  dreamResultImmersiveKicker: 'AI astral multidimensional inference',
   dreamResultTitle: 'Reading the symbols',
   dreamResultSubtitle:
     'DreamNest will stream the result here, then close the connection as soon as the final message arrives.',
+  dreamResultStreamingSubtitle: 'Astral analysis is connected. Keep breathing steadily...',
+  dreamResultCompleteSubtitle: 'RAG astral analysis connected successfully',
+  dreamResultStepperTitle: 'Three-level dream neural compute schedule:',
+  dreamResultStreamingStatus: 'Streaming...',
+  dreamResultStepImageMatch: 'Image match',
+  dreamResultStepBrainwave: 'Brainwave',
+  dreamResultStepGraphAlign: 'Graph align',
+  dreamResultStepDone: 'Ready',
+  dreamResultLucidityLabel: 'Dream lucidity',
+  dreamResultConfidenceLabel: 'Subconscious confidence',
+  dreamResultLucidityValue: '✨ High (HIGH)',
+  dreamResultConfidenceSuffix: '(very strong match)',
+  dreamResultTerminalHeader: '❖ INTERPRETER CHRONICLE:',
+  dreamResultTerminalPlaceholder:
+    '❖ Guiding last night\'s nebula in. Keep your breathing smooth. REM model sequence is connecting...',
+  dreamResultSymbolsTitle: '🔍 Core self imagery extraction',
+  dreamResultPremiumTitle: 'L3 astrologer deep mind map',
+  dreamResultPremiumSubtitle:
+    'Uses a frontier-scale LLM to explore the dream\'s therapeutic links with current fixations and provide a personal sleep-easing audio path.',
+  dreamResultPremiumButton: 'Unlock 29 gems',
+  dreamResultSaveButton: 'Save to dream journal and finish',
+  dreamResultStreamL1Prefix: '❖ [L1 Engine] Pattern anchor captured: analyzing core imagery ',
+  dreamResultStreamL1Middle: '... match coherence: ',
+  dreamResultStreamL1Suffix: '%\n',
+  dreamResultStreamL2:
+    '❖ [L2 Neural] Primary neural dreamwave decode complete: emotional peak captured: calm joy with a flash of startle. Self state: REM phase...\n',
+  dreamResultStreamL3:
+    '❖ [L3 Oracle] Starting the DreamNest dream knowledge graph correlator (covering 12,000+ psychic star nodes)...\n\n',
+  dreamResultStreamThemeLabel: '[Dream core theme]:',
+  dreamResultStreamSymbolsLabel: '[Dream imagery extraction]:',
+  dreamResultAnalysisJoyTitle: 'A spiritual cleansing in floating clouds and aurora whales',
+  dreamResultAnalysisJoyTheme: 'Spiritual awakening and psychological boundaries in a crystal palace',
+  dreamResultAnalysisJoySymbolOne: 'Crystal walls',
+  dreamResultAnalysisJoyMeaningOne:
+    'Represents radical transparency in the deep psyche and a wish to encounter the inner self without disguise.',
+  dreamResultAnalysisJoySymbolTwo: 'Singing giant whale',
+  dreamResultAnalysisJoyMeaningTwo:
+    'A singing ocean creature often evokes the ancient collective unconscious, suggesting inspiration or healing quietly taking root.',
+  dreamResultAnalysisJoySymbolThree: 'Sapphire key',
+  dreamResultAnalysisJoyMeaningThree:
+    'A final naming right over a psychological lock. Blue reflects reason, wisdom, and a channel for deeper inspiration.',
+  dreamResultAnalysisJoySymbolFour: 'Falling stairs',
+  dreamResultAnalysisJoyMeaningFour:
+    'The catalyst for waking, often tied to high brainwave transition. It acts as a spontaneous protection against being swallowed too deeply by the dream.',
+  dreamResultAnalysisJoyKeywordOne: 'Cloud palace',
+  dreamResultAnalysisJoyKeywordTwo: 'Giant whale',
+  dreamResultAnalysisJoyKeywordThree: 'Star-veiled figure',
+  dreamResultAnalysisCalmTitle: 'A quiet refuge in a deep-sea greenhouse of glowing plants',
+  dreamResultAnalysisCalmTheme: 'Dissolving subconscious defenses and restoring life-source energy',
+  dreamResultAnalysisCalmSymbolOne: 'Deep-sea glass greenhouse',
+  dreamResultAnalysisCalmMeaningOne:
+    'Symbolizes a gentle, safe boundary of self-isolation and a longing for a calm harbor away from noise.',
+  dreamResultAnalysisCalmSymbolTwo: 'Glowing plants',
+  dreamResultAnalysisCalmMeaningTwo:
+    'Life intuition reviving in the psyche, suggesting ignored potential beginning to light the way.',
+  dreamResultAnalysisCalmSymbolThree: 'Ancient whale',
+  dreamResultAnalysisCalmMeaningThree:
+    'A wise guardian of the soul whose silent movement mirrors your emotions gradually settling.',
+  dreamResultAnalysisCalmKeywordOne: 'Seafloor greenhouse',
+  dreamResultAnalysisCalmKeywordTwo: 'Glowing plants',
+  dreamResultAnalysisCalmKeywordThree: 'Ancient whale',
+  dreamResultAnalysisDefaultTitle: 'Lost clocks and reversed time as psychological symbols',
+  dreamResultAnalysisDefaultTheme: 'Anxiety around losing order and the self-healing work of integration',
+  dreamResultAnalysisDefaultSymbolOne: 'Reversed clock',
+  dreamResultAnalysisDefaultMeaningOne:
+    'Points to anxiety around time passing and losing control, reflecting possible disruption in daily rhythm.',
+  dreamResultAnalysisDefaultSymbolTwo: 'Lost abyss',
+  dreamResultAnalysisDefaultMeaningTwo:
+    'Suggests briefly losing footing in the collective unconscious and invites you to examine repressed waking anxiety.',
+  dreamResultAnalysisDefaultSymbolThree: 'Faint butterfly',
+  dreamResultAnalysisDefaultMeaningThree:
+    'A small light guiding the psyche home, showing that the force for rebuilding inner order has not gone out.',
+  dreamResultAnalysisDefaultKeywordOne: 'Lost',
+  dreamResultAnalysisDefaultKeywordTwo: 'Reversed clock',
+  dreamResultAnalysisDefaultKeywordThree: 'Faint butterfly',
   dreamResultDreamLabel: 'Your dream',
   dreamResultInterpretationLabel: 'Interpretation',
   dreamResultStreamingNow: 'Streaming now',
@@ -91,9 +229,52 @@ export const en: LocaleKeys = {
     'The streaming hook will connect here next. This screen is ready for token-by-token interpretation, cached results, done state, and error state without opening a WebSocket early.',
   dreamResultBackHome: 'Back to Home',
   dreamDetailKicker: 'Dream detail',
+  dreamDetailImmersiveKicker: '✨ Dream-origin detail file',
   dreamDetailNotFoundTitle: 'Dream not found',
   dreamDetailDreamLabel: 'Dream',
   dreamDetailInterpretationLabel: 'Interpretation',
   dreamDetailMissingBody:
     'This entry is no longer available in local history.',
+  dreamDetailPanelLabel: 'Last night\'s fragments',
+  dreamDetailAiReportTitle: 'AI deep interpretation report (L3 selected)',
+  dreamDetailConfidencePrefix: 'Confidence:',
+  dreamDetailCoreThemeLabel: '✦ Core dream theme',
+  dreamDetailSymbolismLabel: '✦ Subconscious symbol breakdown',
+  dreamDetailGuidanceLabel: '✦ Psyche integration guidance',
+  dreamDetailGuidanceMoon:
+    'Try handwriting dream fragments in the morning. Use the key metaphor to approach an unresolved real-world threshold and bring intuition into daytime action.',
+  dreamDetailGuidanceTrain:
+    'The train has a clear direction even with a strange route. Trust intuition this week and consider reconnecting with an old friend to find inspiration through memory.',
+  dreamDetailGuidanceDefault:
+    'You are moving toward a spiritual or creative transition. Try five minutes of morning stillness each day to rebuild the inner center.',
+  dreamDetailMoonSymbolOne: 'Locked door',
+  dreamDetailMoonMeaningOne:
+    'Represents psychic boundaries and hints at private traits that may not yet be ready for public view.',
+  dreamDetailMoonSymbolTwo: 'Violet moonlight',
+  dreamDetailMoonMeaningTwo:
+    'Reflects deep intuition and mystery, suggesting a gentle emotional awakening.',
+  dreamDetailMoonSymbolThree: 'Rose bushes',
+  dreamDetailMoonMeaningThree:
+    'Symbolizes longing and latent self-revelation, hinting that something waits to be discovered among the roses.',
+  dreamDetailTrainSymbolOne: 'Dawn train',
+  dreamDetailTrainMeaningOne:
+    'A vehicle of transition, suggesting a quiet reshaping and acceleration in life direction, work, or relationships.',
+  dreamDetailTrainSymbolTwo: 'Childhood streets',
+  dreamDetailTrainMeaningTwo:
+    'A subconscious return toward safety and belonging, showing that present choices are seeking roots.',
+  dreamDetailTrainSymbolThree: 'Open sea',
+  dreamDetailTrainMeaningThree:
+    'The vastness of emotional energy, suggesting a need to hold and sort complex inner waves.',
+  dreamDetailDefaultSymbol: 'Dream-fragment vessel',
+  dreamDetailDefaultMeaning:
+    'The imagery stirs in the subconscious, suggesting the brain is trimming and refining scattered daytime memory.',
+  journalSearchPlaceholder: 'Search keywords in past records...',
+  journalKeywordSubconscious: 'subconscious',
+  journalKeywordDreamSymbol: 'dream symbol',
+  journalModelTier: 'L3 analysis ›',
+  journalFilterAll: 'All',
+  journalEmptyTitle: 'No fragments found',
+  journalEmptySubtitle:
+    'No dream records match these filters. Write your first night fragment and light the first star of the self.',
+  journalEmptyButton: '🌙 Read my first dream',
 };

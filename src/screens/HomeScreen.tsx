@@ -31,7 +31,7 @@ type Props = {
 const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
 
 function HomeScreen({ onNavigateToTab }: Props): React.JSX.Element {
-  useI18n();
+  const language = useI18n();
   const navigation =
     useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   
@@ -85,10 +85,12 @@ function HomeScreen({ onNavigateToTab }: Props): React.JSX.Element {
   // Helper to format today's date in a premium way
   const getPremiumDateString = (): string => {
     const today = new Date();
-    const year = today.getFullYear();
-    const month = today.getMonth() + 1;
-    const date = today.getDate();
-    return `${year}年${month}月${date}日 · 晨曦`;
+    const formattedDate = new Intl.DateTimeFormat(language, {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+    }).format(today);
+    return `${formattedDate} · ${t('homeDateSuffix')}`;
   };
 
   // Mock emotional wave heights for 7 days
@@ -99,7 +101,7 @@ function HomeScreen({ onNavigateToTab }: Props): React.JSX.Element {
     { label: '05-21', height: 92, color: COLORS.secondaryAccent, highlight: true },
     { label: '05-22', height: 64, color: COLORS.primaryAccent },
     { label: '05-23', height: 86, color: COLORS.primaryAccent },
-    { label: '今天', height: 96, color: COLORS.success },
+    { label: t('commonToday'), height: 96, color: COLORS.success },
   ];
 
   return (
@@ -152,20 +154,20 @@ function HomeScreen({ onNavigateToTab }: Props): React.JSX.Element {
         >
           <View style={styles.ctaHeader}>
             <View style={styles.ctaTagContainer}>
-              <Text style={styles.ctaTag}>AI REM 記錄器</Text>
+              <Text style={styles.ctaTag}>{t('homeCtaTag')}</Text>
             </View>
             <Animated.View style={[styles.sparkleSpinner, animatedSparkleStyle]}>
               <Text style={styles.sparkleSpinnerText}>✨</Text>
             </Animated.View>
           </View>
           
-          <Text style={styles.ctaTitle}>記錄昨夜的碎羽？</Text>
+          <Text style={styles.ctaTitle}>{t('homeCtaTitle')}</Text>
           <Text style={styles.ctaSubtitle}>
-            通過三層夢魂神經網絡進行多維解碼，揭示您的深層自性。
+            {t('homeCtaSubtitle')}
           </Text>
           
           <View style={styles.ctaFooter}>
-            <Text style={styles.ctaFooterText}>開始捕捉夢痕</Text>
+            <Text style={styles.ctaFooterText}>{t('homeCtaFooter')}</Text>
             <Text style={styles.ctaChevron}>›</Text>
           </View>
         </AnimatedPressable>
@@ -180,9 +182,9 @@ function HomeScreen({ onNavigateToTab }: Props): React.JSX.Element {
             <View style={styles.recHeader}>
               <View style={styles.recLabelRow}>
                 <Text style={styles.recIcon}>🌙</Text>
-                <Text style={styles.recLabel}>今日推薦解析</Text>
+                <Text style={styles.recLabel}>{t('homeRecommendationLabel')}</Text>
               </View>
-              <Text style={styles.recScore}>夢境自性 RAG 指數 92%</Text>
+              <Text style={styles.recScore}>{t('homeRecommendationScore')}</Text>
             </View>
             
             <Text style={styles.recTitle}>{t(history[0].titleKey)}</Text>
@@ -192,9 +194,9 @@ function HomeScreen({ onNavigateToTab }: Props): React.JSX.Element {
             
             <View style={styles.recFooter}>
               <Text style={[styles.recEmotion, { color: history[0].emotionColor }]}>
-                情緒：{t(history[0].emotionKey)}
+                {t('homeRecommendationEmotionPrefix')}{t(history[0].emotionKey)}
               </Text>
-              <Text style={styles.recTier}>L3 高階分析 ›</Text>
+              <Text style={styles.recTier}>{t('homeRecommendationTier')}</Text>
             </View>
           </Pressable>
         )}
@@ -204,14 +206,14 @@ function HomeScreen({ onNavigateToTab }: Props): React.JSX.Element {
           <View style={styles.chartHeader}>
             <View style={styles.chartTitleRow}>
               <Text style={styles.chartIcon}>📈</Text>
-              <Text style={styles.chartTitle}>過去7天潛意識情緒波動</Text>
+              <Text style={styles.chartTitle}>{t('homeChartTitle')}</Text>
             </View>
-            <Text style={styles.chartMeta}>平靜與奇妙為主</Text>
+            <Text style={styles.chartMeta}>{t('homeChartMeta')}</Text>
           </View>
 
           <View style={styles.chartPanel}>
             <View style={styles.chartBadge}>
-              <Text style={styles.chartBadgeText}>AI 匹配度: 88%</Text>
+              <Text style={styles.chartBadgeText}>{t('homeChartBadge')}</Text>
             </View>
             
             {/* Grid Line simulation */}
@@ -248,7 +250,7 @@ function HomeScreen({ onNavigateToTab }: Props): React.JSX.Element {
         {/* Horizontal Carousel for History */}
         <View style={styles.carouselSection}>
           <Text style={styles.carouselTitle}>
-            夢之回響 · 歷史檔案 ({history.length})
+            {t('homeCarouselTitle')} ({history.length})
           </Text>
           
           <ScrollView
@@ -281,7 +283,7 @@ function HomeScreen({ onNavigateToTab }: Props): React.JSX.Element {
                       {t(item.emotionKey)}
                     </Text>
                   </View>
-                  <Text style={styles.lucidityLabel}>高明晰</Text>
+                  <Text style={styles.lucidityLabel}>{t('homeLucidityHigh')}</Text>
                 </View>
               </Pressable>
             ))}

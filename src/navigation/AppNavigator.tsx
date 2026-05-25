@@ -12,6 +12,7 @@ import DreamResultScreen from '../screens/DreamResultScreen';
 import HomeScreen from '../screens/HomeScreen';
 import JournalScreen from '../screens/JournalScreen';
 import ProfileScreen from '../screens/ProfileScreen';
+import SettingsScreen from '../screens/SettingsScreen';
 import { useAuthStore } from '../store/authStore';
 import { COLORS, TYPOGRAPHY } from '../types/theme';
 
@@ -21,6 +22,7 @@ export type RootStackParamList = {
   DreamInput: undefined;
   DreamResult: { dreamContent: string };
   DreamDetail: { dreamId: string };
+  Settings: undefined;
 };
 
 type TabKey = 'Home' | 'Journal' | 'DreamGraph' | 'Profile';
@@ -48,7 +50,7 @@ function MainTabsScreen(): React.JSX.Element {
       case 'Journal':
         return <JournalScreen onNavigateToTab={setActiveTab} />;
       case 'Profile':
-        return <ProfileScreen onNavigateToTab={setActiveTab} />;
+        return <ProfileScreen />;
       case 'Home':
       default:
         return <HomeScreen onNavigateToTab={setActiveTab} />;
@@ -169,6 +171,13 @@ function AppNavigator(): React.JSX.Element {
               component={DreamDetailScreen}
               options={{
                 title: t('navDreamDetail'),
+              }}
+            />
+            <Stack.Screen
+              name="Settings"
+              component={SettingsScreen}
+              options={{
+                headerShown: false,
               }}
             />
           </>

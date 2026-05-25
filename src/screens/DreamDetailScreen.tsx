@@ -10,7 +10,7 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-import { t } from '../lib/i18n';
+import { t, useI18n } from '../lib/i18n';
 import type { RootStackParamList } from '../navigation/AppNavigator';
 import { useDreamStore } from '../store/dreamStore';
 import { COLORS, TYPOGRAPHY } from '../types/theme';
@@ -20,19 +20,20 @@ type Props = NativeStackScreenProps<RootStackParamList, 'DreamDetail'>;
 const getEmotionStyles = (emotion: string) => {
   switch (emotion) {
     case 'nightmare':
-      return { bg: 'rgba(224, 107, 139, 0.15)', text: '#E06B8B', tag: '👿 夢魘' };
+      return { bg: 'rgba(224, 107, 139, 0.15)', text: '#E06B8B', tag: `👿 ${t('emotionNightmare')}` };
     case 'anxiety':
-      return { bg: 'rgba(232, 155, 77, 0.15)', text: '#E89B4D', tag: '🌪️ 焦慮' };
+      return { bg: 'rgba(232, 155, 77, 0.15)', text: '#E89B4D', tag: `🌪️ ${t('emotionAnxiety')}` };
     case 'calm':
-      return { bg: 'rgba(91, 196, 160, 0.15)', text: '#5BC4A0', tag: '🍃 平靜' };
+      return { bg: 'rgba(91, 196, 160, 0.15)', text: '#5BC4A0', tag: `🍃 ${t('emotionCalm')}` };
     case 'joy':
-      return { bg: 'rgba(123, 110, 246, 0.15)', text: '#7B6EF6', tag: '✨ 奇妙' };
+      return { bg: 'rgba(123, 110, 246, 0.15)', text: '#7B6EF6', tag: `✨ ${t('emotionJoy')}` };
     default:
-      return { bg: 'rgba(139, 130, 176, 0.15)', text: '#8B82B0', tag: '💭 中性' };
+      return { bg: 'rgba(139, 130, 176, 0.15)', text: '#8B82B0', tag: `💭 ${t('emotionNeutral')}` };
   }
 };
 
 function DreamDetailScreen({ route }: Props): React.JSX.Element {
+  useI18n();
   const dream = useDreamStore(state =>
     state.history.find(record => record.id === route.params.dreamId),
   );
@@ -46,7 +47,8 @@ function DreamDetailScreen({ route }: Props): React.JSX.Element {
     const localizedKeys = [
       'dreamOneTitle', 'dreamOneDate', 'dreamOneEmotion', 'dreamOneSummary', 'dreamOneContent', 'dreamOneInterpretation',
       'dreamTwoTitle', 'dreamTwoDate', 'dreamTwoEmotion', 'dreamTwoSummary', 'dreamTwoContent', 'dreamTwoInterpretation',
-      'dreamDetailKicker', 'dreamDetailNotFoundTitle', 'dreamDetailDreamLabel', 'dreamDetailInterpretationLabel', 'dreamDetailMissingBody'
+      'dreamDetailKicker', 'dreamDetailNotFoundTitle', 'dreamDetailDreamLabel', 'dreamDetailInterpretationLabel', 'dreamDetailMissingBody',
+      'commonToday'
     ];
     if (localizedKeys.includes(textKey)) {
       return t(textKey as any);
@@ -76,23 +78,23 @@ function DreamDetailScreen({ route }: Props): React.JSX.Element {
 
     if (dream.id === 'moon-garden') {
       return [
-        { symbol: '鎖著的門', meaning: '代表心靈邊界，暗示某些個人隱私或尚未準備好被大眾窺視的特質。' },
-        { symbol: '紫色月光', meaning: '映射深層直覺與神秘心境，提示夢者可能正經歷某種溫和的感性覺察。' },
-        { symbol: '玫瑰花叢', meaning: '象徵渴望與潛在的自我表露，暗示玫瑰深處有事物在等待你被發掘。' }
+        { symbol: t('dreamDetailMoonSymbolOne'), meaning: t('dreamDetailMoonMeaningOne') },
+        { symbol: t('dreamDetailMoonSymbolTwo'), meaning: t('dreamDetailMoonMeaningTwo') },
+        { symbol: t('dreamDetailMoonSymbolThree'), meaning: t('dreamDetailMoonMeaningThree') },
       ];
     }
 
     if (dream.id === 'orange-train') {
       return [
-        { symbol: '黎明火車', meaning: '轉變的載體，預示生活方向或職涯情感正在進行悄然的重塑與提速。' },
-        { symbol: '童年街道', meaning: '潛意識對安全感與歸屬感的歸航，說明現實中某些抉擇在尋求源頭指引。' },
-        { symbol: '無垠海面', meaning: '情感能量的浩瀚無垠，暗示需要包容、梳理複雜的心靈波瀾。' }
+        { symbol: t('dreamDetailTrainSymbolOne'), meaning: t('dreamDetailTrainMeaningOne') },
+        { symbol: t('dreamDetailTrainSymbolTwo'), meaning: t('dreamDetailTrainMeaningTwo') },
+        { symbol: t('dreamDetailTrainSymbolThree'), meaning: t('dreamDetailTrainMeaningThree') },
       ];
     }
 
     // Default basic fallback
     return [
-      { symbol: '夢絮載體', meaning: '意象在潛意識中激盪，預示著大腦正在對白天的零碎記憶進行修剪與提純。' }
+      { symbol: t('dreamDetailDefaultSymbol'), meaning: t('dreamDetailDefaultMeaning') },
     ];
   };
 
@@ -122,7 +124,7 @@ function DreamDetailScreen({ route }: Props): React.JSX.Element {
           {/* Custom detail header */}
           <View style={styles.headerBlock}>
             <View style={styles.headerBlockLeft}>
-              <Text style={styles.kicker}>✨ 夢之本源細節檔案</Text>
+              <Text style={styles.kicker}>{t('dreamDetailImmersiveKicker')}</Text>
               <Text style={styles.title}>{renderText(dream.titleKey)}</Text>
             </View>
             
@@ -155,7 +157,7 @@ function DreamDetailScreen({ route }: Props): React.JSX.Element {
 
           {/* Content panel */}
           <View style={styles.panel}>
-            <Text style={styles.panelLabel}>昨夜夢絮</Text>
+            <Text style={styles.panelLabel}>{t('dreamDetailPanelLabel')}</Text>
             <Text style={styles.bodyText}>{renderText(dream.dreamContentKey)}</Text>
           </View>
 
@@ -164,20 +166,20 @@ function DreamDetailScreen({ route }: Props): React.JSX.Element {
             <View style={styles.aiPanelHeader}>
               <View style={styles.aiPanelTitleRow}>
                 <Text style={styles.aiSparkle}>✨</Text>
-                <Text style={styles.aiPanelTitle}>AI 深層釋義報告 (L3精選款)</Text>
+                <Text style={styles.aiPanelTitle}>{t('dreamDetailAiReportTitle')}</Text>
               </View>
-              <Text style={styles.aiConfidence}>置信度: {confidenceScore}%</Text>
+              <Text style={styles.aiConfidence}>{t('dreamDetailConfidencePrefix')} {confidenceScore}%</Text>
             </View>
 
             {/* Core theme */}
             <View style={styles.aiSection}>
-              <Text style={styles.aiSectionLabel}>✦ 釋夢心核主題</Text>
+              <Text style={styles.aiSectionLabel}>{t('dreamDetailCoreThemeLabel')}</Text>
               <Text style={styles.aiSectionValue}>{getTheme()}</Text>
             </View>
 
             {/* Symbolisms */}
             <View style={styles.aiSection}>
-              <Text style={styles.aiSectionLabel}>✦ 潛意識象徵解體</Text>
+              <Text style={styles.aiSectionLabel}>{t('dreamDetailSymbolismLabel')}</Text>
               <View style={styles.symbolsList}>
                 {getSymbolisms().map((sym: { symbol: string; meaning: string }, idx: number) => (
                   <View key={idx} style={styles.symbolCard}>
@@ -190,14 +192,14 @@ function DreamDetailScreen({ route }: Props): React.JSX.Element {
 
             {/* Guidance */}
             <View style={styles.aiSection}>
-              <Text style={styles.aiSectionLabel}>✦ 心靈整合指引</Text>
+              <Text style={styles.aiSectionLabel}>{t('dreamDetailGuidanceLabel')}</Text>
               <View style={styles.guidanceCard}>
                 <Text style={styles.guidanceText}>
                   {dream.id === 'moon-garden'
-                    ? '建議清晨手寫夢境碎片，通過鑰匙隱喻嘗試解答現實中未決的一道關卡，將潛在直覺帶入白天事務。'
+                    ? t('dreamDetailGuidanceMoon')
                     : dream.id === 'orange-train'
-                    ? '火車方向明確但軌跡奇特。多信任你的直覺，本週可嘗試與舊友取得聯繫，藉助回溯找尋靈感。'
-                    : '您正在向某種靈性思維或創作轉型。建議每天早晨靜坐5分鐘重塑精神核心。'}
+                    ? t('dreamDetailGuidanceTrain')
+                    : t('dreamDetailGuidanceDefault')}
                 </Text>
               </View>
             </View>
