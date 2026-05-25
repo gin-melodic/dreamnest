@@ -18,67 +18,37 @@ import Animated, {
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { t, useI18n } from '../lib/i18n';
+import {
+  MOCK_DREAM_ANALYSIS,
+  MOCK_EMOTION_STYLES,
+  type MockDreamEmotion,
+} from '../mocks/appMockData';
 import type { RootStackParamList } from '../navigation/AppNavigator';
 import { useDreamStore } from '../store/dreamStore';
 import { COLORS, TYPOGRAPHY } from '../types/theme';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'DreamResult'>;
 
-type EmotionType = 'joy' | 'calm' | 'anxiety' | 'nightmare' | 'neutral';
-
 const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
 
-const getEmotionStyles = (emotion: EmotionType) => {
-  switch (emotion) {
-    case 'nightmare':
-      return {
-        bg: 'rgba(224, 107, 139, 0.15)',
-        border: 'rgba(224, 107, 139, 0.4)',
-        text: '#E06B8B',
-        tag: `👿 ${t('emotionNightmare')}`,
-        colorCode: '#E06B8B',
-      };
-    case 'anxiety':
-      return {
-        bg: 'rgba(232, 155, 77, 0.15)',
-        border: 'rgba(232, 155, 77, 0.4)',
-        text: '#E89B4D',
-        tag: `🌪️ ${t('emotionAnxiety')}`,
-        colorCode: '#E89B4D',
-      };
-    case 'calm':
-      return {
-        bg: 'rgba(91, 196, 160, 0.15)',
-        border: 'rgba(91, 196, 160, 0.4)',
-        text: '#5BC4A0',
-        tag: `🍃 ${t('emotionCalm')}`,
-        colorCode: '#5BC4A0',
-      };
-    case 'joy':
-      return {
-        bg: 'rgba(123, 110, 246, 0.15)',
-        border: 'rgba(123, 110, 246, 0.4)',
-        text: '#7B6EF6',
-        tag: `✨ ${t('emotionJoy')}`,
-        colorCode: '#7B6EF6',
-      };
-    default:
-      return {
-        bg: 'rgba(139, 130, 176, 0.15)',
-        border: 'rgba(139, 130, 176, 0.4)',
-        text: '#8B82B0',
-        tag: `💭 ${t('emotionNeutral')}`,
-        colorCode: '#8B82B0',
-      };
-  }
+const getEmotionStyles = (emotion: MockDreamEmotion) => {
+  const style = MOCK_EMOTION_STYLES[emotion];
+
+  return {
+    ...style,
+    tag: `${style.icon} ${t(style.labelKey)}`,
+  };
 };
 
 function DreamResultScreen({ route, navigation }: Props): React.JSX.Element {
   const language = useI18n();
   const { dreamContent } = route.params;
-  
-  // @ts-ignore (Retrieve selected emotion from params if present)
-  const emotionParam: EmotionType = route.params?.emotion || 'joy';
+
+  const emotionParam = (
+    route.params.emotion && route.params.emotion in MOCK_EMOTION_STYLES
+      ? route.params.emotion
+      : 'joy'
+  ) as MockDreamEmotion;
   const emoStyle = getEmotionStyles(emotionParam);
 
   const history = useDreamStore(state => state.history);
@@ -115,63 +85,24 @@ function DreamResultScreen({ route, navigation }: Props): React.JSX.Element {
     navigation.popToTop();
   };
 
-  // Mock symbolism data matching the input emotion
   const generatedAnalysis = useMemo(() => {
     const symbolJoiner = language === 'en' ? ', ' : '、';
+    const mockAnalysis =
+      emotionParam === 'joy' || emotionParam === 'calm'
+        ? MOCK_DREAM_ANALYSIS[emotionParam]
+        : MOCK_DREAM_ANALYSIS.default;
 
-    if (emotionParam === 'joy') {
-      return {
-        title: t('dreamResultAnalysisJoyTitle'),
-        theme: t('dreamResultAnalysisJoyTheme'),
-        symbolism: [
-          { symbol: t('dreamResultAnalysisJoySymbolOne'), meaning: t('dreamResultAnalysisJoyMeaningOne') },
-          { symbol: t('dreamResultAnalysisJoySymbolTwo'), meaning: t('dreamResultAnalysisJoyMeaningTwo') },
-          { symbol: t('dreamResultAnalysisJoySymbolThree'), meaning: t('dreamResultAnalysisJoyMeaningThree') },
-          { symbol: t('dreamResultAnalysisJoySymbolFour'), meaning: t('dreamResultAnalysisJoyMeaningFour') },
-        ],
-        keywords: [
-          t('dreamResultAnalysisJoyKeywordOne'),
-          t('dreamResultAnalysisJoyKeywordTwo'),
-          t('dreamResultAnalysisJoyKeywordThree'),
-        ],
-        symbolJoiner,
-        confidence: 94,
-      };
-    } else if (emotionParam === 'calm') {
-      return {
-        title: t('dreamResultAnalysisCalmTitle'),
-        theme: t('dreamResultAnalysisCalmTheme'),
-        symbolism: [
-          { symbol: t('dreamResultAnalysisCalmSymbolOne'), meaning: t('dreamResultAnalysisCalmMeaningOne') },
-          { symbol: t('dreamResultAnalysisCalmSymbolTwo'), meaning: t('dreamResultAnalysisCalmMeaningTwo') },
-          { symbol: t('dreamResultAnalysisCalmSymbolThree'), meaning: t('dreamResultAnalysisCalmMeaningThree') },
-        ],
-        keywords: [
-          t('dreamResultAnalysisCalmKeywordOne'),
-          t('dreamResultAnalysisCalmKeywordTwo'),
-          t('dreamResultAnalysisCalmKeywordThree'),
-        ],
-        symbolJoiner,
-        confidence: 96,
-      };
-    } else {
-      return {
-        title: t('dreamResultAnalysisDefaultTitle'),
-        theme: t('dreamResultAnalysisDefaultTheme'),
-        symbolism: [
-          { symbol: t('dreamResultAnalysisDefaultSymbolOne'), meaning: t('dreamResultAnalysisDefaultMeaningOne') },
-          { symbol: t('dreamResultAnalysisDefaultSymbolTwo'), meaning: t('dreamResultAnalysisDefaultMeaningTwo') },
-          { symbol: t('dreamResultAnalysisDefaultSymbolThree'), meaning: t('dreamResultAnalysisDefaultMeaningThree') },
-        ],
-        keywords: [
-          t('dreamResultAnalysisDefaultKeywordOne'),
-          t('dreamResultAnalysisDefaultKeywordTwo'),
-          t('dreamResultAnalysisDefaultKeywordThree'),
-        ],
-        symbolJoiner,
-        confidence: 90,
-      };
-    }
+    return {
+      title: t(mockAnalysis.titleKey),
+      theme: t(mockAnalysis.themeKey),
+      symbolism: mockAnalysis.symbolKeys.map(symbol => ({
+        symbol: t(symbol.symbolKey),
+        meaning: t(symbol.meaningKey),
+      })),
+      keywords: mockAnalysis.keywordKeys.map(keywordKey => t(keywordKey)),
+      symbolJoiner,
+      confidence: mockAnalysis.confidence,
+    };
   }, [emotionParam, language]);
 
   // Client-Side Simulated SSE Streaming
@@ -187,9 +118,14 @@ function DreamResultScreen({ route, navigation }: Props): React.JSX.Element {
     const t1 = setTimeout(() => {
       setStreamProgress(1);
       progressBarWidth.value = withTiming(25, { duration: 600 });
-      setStreamText(t('dreamResultStreamL1Prefix') + 
-        generatedAnalysis.symbolism.map((s: { symbol: string }) => `[${s.symbol}]`).join(generatedAnalysis.symbolJoiner) + 
-        `${t('dreamResultStreamL1Middle')}${generatedAnalysis.confidence}${t('dreamResultStreamL1Suffix')}`
+      setStreamText(
+        t('dreamResultStreamL1Prefix') +
+          generatedAnalysis.symbolism
+            .map((s: { symbol: string }) => `[${s.symbol}]`)
+            .join(generatedAnalysis.symbolJoiner) +
+          `${t('dreamResultStreamL1Middle')}${generatedAnalysis.confidence}${t(
+            'dreamResultStreamL1Suffix',
+          )}`,
       );
     }, 400);
 
@@ -208,9 +144,11 @@ function DreamResultScreen({ route, navigation }: Props): React.JSX.Element {
     }, 1900);
 
     // Step 4: Stream text rendering of theme (2800ms)
-    let interval: any;
-    const textToAnimate = `${t('dreamResultStreamThemeLabel')}${generatedAnalysis.theme}\n\n${t('dreamResultStreamSymbolsLabel')}\n`;
-    
+    let interval: ReturnType<typeof setInterval> | undefined;
+    const textToAnimate = `${t('dreamResultStreamThemeLabel')}${
+      generatedAnalysis.theme
+    }\n\n${t('dreamResultStreamSymbolsLabel')}\n`;
+
     const t4 = setTimeout(() => {
       setStreamProgress(4);
       progressBarWidth.value = withTiming(100, { duration: 2000 });
@@ -221,7 +159,9 @@ function DreamResultScreen({ route, navigation }: Props): React.JSX.Element {
           idx++;
           scrollRef.current?.scrollToEnd({ animated: true });
         } else {
-          clearInterval(interval);
+          if (interval) {
+            clearInterval(interval);
+          }
           revealSymbolisms();
         }
       }, 15);
@@ -257,18 +197,18 @@ function DreamResultScreen({ route, navigation }: Props): React.JSX.Element {
       // Append the newly interpreted dream to the global store history dynamically
       const newRecord = {
         id: String(Date.now()),
-        titleKey: generatedAnalysis.title as any, // Typed so it will bypass localization and render directly
-        dreamContentKey: dreamContent as any,
-        interpretationKey: generatedAnalysis.theme as any,
-        emotionKey: emotionParam as any,
+        titleKey: generatedAnalysis.title,
+        dreamContentKey: dreamContent,
+        interpretationKey: generatedAnalysis.theme,
+        emotionKey: emotionParam,
         emotionColor: emoStyle.colorCode,
-        createdAtKey: 'commonToday' as any,
+        createdAtKey: 'commonToday',
         // Extra payload metadata matching PhoneSimulator
         aiKeywords: generatedAnalysis.keywords,
         symbolism: generatedAnalysis.symbolism,
         confidenceScore: generatedAnalysis.confidence,
       };
-      
+
       // Store tozustand history
       setHistory([newRecord, ...history]);
     };
@@ -280,7 +220,15 @@ function DreamResultScreen({ route, navigation }: Props): React.JSX.Element {
       clearTimeout(t4);
       if (interval) clearInterval(interval);
     };
-  }, [dreamContent, emoStyle.colorCode, emotionParam, generatedAnalysis, history, progressBarWidth, setHistory]);
+  }, [
+    dreamContent,
+    emoStyle.colorCode,
+    emotionParam,
+    generatedAnalysis,
+    history,
+    progressBarWidth,
+    setHistory,
+  ]);
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -291,75 +239,128 @@ function DreamResultScreen({ route, navigation }: Props): React.JSX.Element {
         showsVerticalScrollIndicator={false}
       >
         <View style={styles.header}>
-          <Text style={styles.kicker}>✨ {t('dreamResultImmersiveKicker')}</Text>
+          <Text style={styles.kicker}>
+            ✨ {t('dreamResultImmersiveKicker')}
+          </Text>
           <Text style={styles.title}>{t('dreamResultTitle')}</Text>
           <Text style={styles.subtitle}>
-            {isStreaming ? t('dreamResultStreamingSubtitle') : t('dreamResultCompleteSubtitle')}
+            {isStreaming
+              ? t('dreamResultStreamingSubtitle')
+              : t('dreamResultCompleteSubtitle')}
           </Text>
         </View>
 
         {/* Stepper tracker (PhoneSimulator logic) */}
         <View style={styles.stepperCard}>
           <View style={styles.stepperHeader}>
-            <Text style={styles.stepperHeaderText}>{t('dreamResultStepperTitle')}</Text>
-            {isStreaming && <Text style={styles.stepperStatusText}>{t('dreamResultStreamingStatus')}</Text>}
+            <Text style={styles.stepperHeaderText}>
+              {t('dreamResultStepperTitle')}
+            </Text>
+            {isStreaming && (
+              <Text style={styles.stepperStatusText}>
+                {t('dreamResultStreamingStatus')}
+              </Text>
+            )}
           </View>
-          
+
           <View style={styles.stepperBubblesRow}>
             {/* Progress Line */}
             <View style={styles.progressBackgroundLine} />
-            <Animated.View style={[styles.progressActiveLine, animatedProgressStyle]} />
+            <Animated.View
+              style={[styles.progressActiveLine, animatedProgressStyle]}
+            />
 
             {/* Bubble 1: L1 */}
             <View style={styles.bubbleCol}>
-              <View style={[
-                styles.bubbleCircle,
-                streamProgress >= 1 ? styles.bubbleCircleActive : styles.bubbleCircle
-              ]}>
-                <Text style={[styles.bubbleText, streamProgress >= 1 && styles.bubbleTextActive]}>
+              <View
+                style={[
+                  styles.bubbleCircle,
+                  streamProgress >= 1
+                    ? styles.bubbleCircleActive
+                    : styles.bubbleCircle,
+                ]}
+              >
+                <Text
+                  style={[
+                    styles.bubbleText,
+                    streamProgress >= 1 && styles.bubbleTextActive,
+                  ]}
+                >
                   {streamProgress >= 2 ? '✓' : 'L1'}
                 </Text>
               </View>
-              <Text style={styles.bubbleLabel}>{t('dreamResultStepImageMatch')}</Text>
+              <Text style={styles.bubbleLabel}>
+                {t('dreamResultStepImageMatch')}
+              </Text>
             </View>
 
             {/* Bubble 2: L2 */}
             <View style={styles.bubbleCol}>
-              <View style={[
-                styles.bubbleCircle,
-                streamProgress >= 2 ? styles.bubbleCircleActive : styles.bubbleCircle
-              ]}>
-                <Text style={[styles.bubbleText, streamProgress >= 2 && styles.bubbleTextActive]}>
+              <View
+                style={[
+                  styles.bubbleCircle,
+                  streamProgress >= 2
+                    ? styles.bubbleCircleActive
+                    : styles.bubbleCircle,
+                ]}
+              >
+                <Text
+                  style={[
+                    styles.bubbleText,
+                    streamProgress >= 2 && styles.bubbleTextActive,
+                  ]}
+                >
                   {streamProgress >= 3 ? '✓' : 'L2'}
                 </Text>
               </View>
-              <Text style={styles.bubbleLabel}>{t('dreamResultStepBrainwave')}</Text>
+              <Text style={styles.bubbleLabel}>
+                {t('dreamResultStepBrainwave')}
+              </Text>
             </View>
 
             {/* Bubble 3: L3 */}
             <View style={styles.bubbleCol}>
-              <View style={[
-                styles.bubbleCircle,
-                streamProgress >= 3 ? styles.bubbleCircleActive : styles.bubbleCircle
-              ]}>
-                <Text style={[styles.bubbleText, streamProgress >= 3 && styles.bubbleTextActive]}>
+              <View
+                style={[
+                  styles.bubbleCircle,
+                  streamProgress >= 3
+                    ? styles.bubbleCircleActive
+                    : styles.bubbleCircle,
+                ]}
+              >
+                <Text
+                  style={[
+                    styles.bubbleText,
+                    streamProgress >= 3 && styles.bubbleTextActive,
+                  ]}
+                >
                   {streamProgress >= 4 ? '✓' : 'L3'}
                 </Text>
               </View>
-              <Text style={styles.bubbleLabel}>{t('dreamResultStepGraphAlign')}</Text>
+              <Text style={styles.bubbleLabel}>
+                {t('dreamResultStepGraphAlign')}
+              </Text>
             </View>
 
             {/* Bubble 4: Done */}
             <View style={styles.bubbleCol}>
-              <View style={[
-                styles.bubbleCircle,
-                (streamProgress >= 4 && !isStreaming) ? styles.bubbleCircleSuccess : styles.bubbleCircle
-              ]}>
-                <Text style={[
-                  styles.bubbleText,
-                  (streamProgress >= 4 && !isStreaming) && styles.bubbleTextSuccess
-                ]}>
-                  {(streamProgress >= 4 && !isStreaming) ? '✓' : 'Done'}
+              <View
+                style={[
+                  styles.bubbleCircle,
+                  streamProgress >= 4 && !isStreaming
+                    ? styles.bubbleCircleSuccess
+                    : styles.bubbleCircle,
+                ]}
+              >
+                <Text
+                  style={[
+                    styles.bubbleText,
+                    streamProgress >= 4 &&
+                      !isStreaming &&
+                      styles.bubbleTextSuccess,
+                  ]}
+                >
+                  {streamProgress >= 4 && !isStreaming ? '✓' : 'Done'}
                 </Text>
               </View>
               <Text style={styles.bubbleLabel}>{t('dreamResultStepDone')}</Text>
@@ -370,14 +371,20 @@ function DreamResultScreen({ route, navigation }: Props): React.JSX.Element {
         {/* Score Dial & Theme (Floating cards) */}
         <View style={styles.metersRow}>
           <View style={styles.meterCardSmall}>
-            <Text style={styles.meterSmallLabel}>{t('dreamResultLucidityLabel')}</Text>
-            <Text style={[styles.meterSmallValue, { color: emoStyle.colorCode }]}>
+            <Text style={styles.meterSmallLabel}>
+              {t('dreamResultLucidityLabel')}
+            </Text>
+            <Text
+              style={[styles.meterSmallValue, { color: emoStyle.colorCode }]}
+            >
               {t('dreamResultLucidityValue')}
             </Text>
           </View>
-          
+
           <View style={styles.meterCardLarge}>
-            <Text style={styles.meterLargeLabel}>{t('dreamResultConfidenceLabel')}</Text>
+            <Text style={styles.meterLargeLabel}>
+              {t('dreamResultConfidenceLabel')}
+            </Text>
             <View style={styles.progressBarBg}>
               <View
                 style={[
@@ -398,10 +405,17 @@ function DreamResultScreen({ route, navigation }: Props): React.JSX.Element {
         {/* Typewriter chronicle terminal window */}
         <View style={styles.terminalPanel}>
           <View style={styles.terminalHeader}>
-            <View style={[styles.terminalPulseDot, { backgroundColor: emoStyle.colorCode }]} />
-            <Text style={styles.terminalHeaderText}>{t('dreamResultTerminalHeader')}</Text>
+            <View
+              style={[
+                styles.terminalPulseDot,
+                { backgroundColor: emoStyle.colorCode },
+              ]}
+            />
+            <Text style={styles.terminalHeaderText}>
+              {t('dreamResultTerminalHeader')}
+            </Text>
           </View>
-          
+
           <Text style={styles.terminalText}>
             {streamText || t('dreamResultTerminalPlaceholder')}
           </Text>
@@ -409,27 +423,36 @@ function DreamResultScreen({ route, navigation }: Props): React.JSX.Element {
           {/* Symbolism breakdown revealed one by one */}
           {!isStreaming && (
             <View style={styles.symbolsSection}>
-              <Text style={styles.symbolsTitle}>{t('dreamResultSymbolsTitle')}</Text>
-              
+              <Text style={styles.symbolsTitle}>
+                {t('dreamResultSymbolsTitle')}
+              </Text>
+
               <View style={styles.symbolsList}>
-                {generatedAnalysis.symbolism.map((sym: { symbol: string; meaning: string }, idx: number) => {
-                  const isVisible = idx <= revealedSymbolIdx;
-                  if (!isVisible) return null;
-                  
-                  return (
-                    <Animated.View
-                      entering={FadeInDown.duration(400)}
-                      key={idx}
-                      style={styles.symbolCard}
-                    >
-                      <View style={styles.symbolCardHeader}>
-                        <View style={[styles.symbolDot, { backgroundColor: COLORS.primaryAccent }]} />
-                        <Text style={styles.symbolName}>{sym.symbol}</Text>
-                      </View>
-                      <Text style={styles.symbolMeaning}>{sym.meaning}</Text>
-                    </Animated.View>
-                  );
-                })}
+                {generatedAnalysis.symbolism.map(
+                  (sym: { symbol: string; meaning: string }, idx: number) => {
+                    const isVisible = idx <= revealedSymbolIdx;
+                    if (!isVisible) return null;
+
+                    return (
+                      <Animated.View
+                        entering={FadeInDown.duration(400)}
+                        key={idx}
+                        style={styles.symbolCard}
+                      >
+                        <View style={styles.symbolCardHeader}>
+                          <View
+                            style={[
+                              styles.symbolDot,
+                              { backgroundColor: COLORS.primaryAccent },
+                            ]}
+                          />
+                          <Text style={styles.symbolName}>{sym.symbol}</Text>
+                        </View>
+                        <Text style={styles.symbolMeaning}>{sym.meaning}</Text>
+                      </Animated.View>
+                    );
+                  },
+                )}
               </View>
             </View>
           )}
@@ -437,21 +460,31 @@ function DreamResultScreen({ route, navigation }: Props): React.JSX.Element {
 
         {/* Premium locker and final actions */}
         {!isStreaming && (
-          <Animated.View entering={FadeInDown.duration(600)} style={styles.actionBlock}>
+          <Animated.View
+            entering={FadeInDown.duration(600)}
+            style={styles.actionBlock}
+          >
             {/* 29 Diamonds Premium Locker Banner */}
             <View style={styles.premiumBanner}>
               <View style={styles.premiumLeft}>
                 <View style={styles.premiumBadgeRow}>
-                  <Text style={styles.premiumBadgeText}>{t('dreamResultPremiumTitle')}</Text>
+                  <Text style={styles.premiumBadgeText}>
+                    {t('dreamResultPremiumTitle')}
+                  </Text>
                   <Text style={styles.premiumLockEmoji}>🔒</Text>
                 </View>
                 <Text style={styles.premiumSubtitle}>
                   {t('dreamResultPremiumSubtitle')}
                 </Text>
               </View>
-              
-              <Pressable accessibilityRole="button" style={styles.premiumButton}>
-                <Text style={styles.premiumButtonText}>{t('dreamResultPremiumButton')}</Text>
+
+              <Pressable
+                accessibilityRole="button"
+                style={styles.premiumButton}
+              >
+                <Text style={styles.premiumButtonText}>
+                  {t('dreamResultPremiumButton')}
+                </Text>
               </Pressable>
             </View>
 
@@ -464,7 +497,9 @@ function DreamResultScreen({ route, navigation }: Props): React.JSX.Element {
               style={[styles.saveButton, animatedButtonStyle]}
             >
               <Text style={styles.saveIcon}>✓</Text>
-              <Text style={styles.saveButtonText}>{t('dreamResultSaveButton')}</Text>
+              <Text style={styles.saveButtonText}>
+                {t('dreamResultSaveButton')}
+              </Text>
             </AnimatedPressable>
           </Animated.View>
         )}

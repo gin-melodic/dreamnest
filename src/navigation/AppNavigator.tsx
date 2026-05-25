@@ -20,7 +20,7 @@ export type RootStackParamList = {
   Auth: undefined;
   MainTabs: undefined;
   DreamInput: undefined;
-  DreamResult: { dreamContent: string };
+  DreamResult: { dreamContent: string; emotion?: string };
   DreamDetail: { dreamId: string };
   Settings: undefined;
 };
@@ -91,7 +91,9 @@ function MainTabsScreen(): React.JSX.Element {
                 style={styles.tabButton}
               >
                 <View style={styles.emojiContainer}>
-                  <Text style={[styles.tabEmoji, isActive && styles.tabEmojiActive]}>
+                  <Text
+                    style={[styles.tabEmoji, isActive && styles.tabEmojiActive]}
+                  >
                     {getEmoji()}
                   </Text>
                   {isActive && <View style={styles.activeDot} />}

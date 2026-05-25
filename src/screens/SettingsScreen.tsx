@@ -12,25 +12,10 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { setLanguage, t, useI18n } from '../lib/i18n';
+import { MOCK_LANGUAGE_OPTIONS, MOCK_SETTINGS } from '../mocks/appMockData';
 import type { RootStackParamList } from '../navigation/AppNavigator';
 import { useAuthStore } from '../store/authStore';
-import type { LocaleKeys, SupportedLanguage } from '../types/i18n';
 import { COLORS, TYPOGRAPHY } from '../types/theme';
-
-const SETTINGS = [
-  { labelKey: 'profileSettingAccount', valueKey: 'profileSettingAccountValue' },
-  { labelKey: 'profileSettingStorage', valueKey: 'profileSettingStorageValue' },
-  { labelKey: 'profileSettingPrivacy', valueKey: 'profileSettingPrivacyValue' },
-] as const;
-
-const LANGUAGE_OPTIONS: Array<{
-  value: SupportedLanguage;
-  labelKey: keyof LocaleKeys;
-}> = [
-  { value: 'en', labelKey: 'profileLanguageEnglish' },
-  { value: 'zh-Hant', labelKey: 'profileLanguageTraditionalChinese' },
-  { value: 'zh-Hans', labelKey: 'profileLanguageSimplifiedChinese' },
-];
 
 function SettingsScreen(): React.JSX.Element {
   const navigation =
@@ -81,7 +66,7 @@ function SettingsScreen(): React.JSX.Element {
 
         {/* Settings configurations */}
         <View style={styles.settingsPanel}>
-          {SETTINGS.map(setting => (
+          {MOCK_SETTINGS.map(setting => (
             <View key={setting.labelKey} style={styles.settingRow}>
               <Text style={styles.settingLabel}>{t(setting.labelKey)}</Text>
               <Text style={styles.settingValue}>{t(setting.valueKey)}</Text>
@@ -92,7 +77,7 @@ function SettingsScreen(): React.JSX.Element {
         {/* Translation locales selector */}
         <View style={styles.languagePanel}>
           <Text style={styles.languageTitle}>{t('profileLanguageTitle')}</Text>
-          {LANGUAGE_OPTIONS.map(option => {
+          {MOCK_LANGUAGE_OPTIONS.map(option => {
             const isSelected = language === option.value;
 
             return (

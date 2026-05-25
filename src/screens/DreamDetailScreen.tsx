@@ -11,25 +11,29 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { t, useI18n } from '../lib/i18n';
+import {
+  MOCK_DEFAULT_DREAM_DETAIL,
+  MOCK_DREAM_DETAIL_BY_ID,
+  MOCK_EMOTION_STYLES,
+  MOCK_LOCALIZED_DREAM_TEXT_KEYS,
+} from '../mocks/appMockData';
 import type { RootStackParamList } from '../navigation/AppNavigator';
 import { useDreamStore } from '../store/dreamStore';
+import type { LocaleKeys } from '../types/i18n';
 import { COLORS, TYPOGRAPHY } from '../types/theme';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'DreamDetail'>;
 
 const getEmotionStyles = (emotion: string) => {
-  switch (emotion) {
-    case 'nightmare':
-      return { bg: 'rgba(224, 107, 139, 0.15)', text: '#E06B8B', tag: `👿 ${t('emotionNightmare')}` };
-    case 'anxiety':
-      return { bg: 'rgba(232, 155, 77, 0.15)', text: '#E89B4D', tag: `🌪️ ${t('emotionAnxiety')}` };
-    case 'calm':
-      return { bg: 'rgba(91, 196, 160, 0.15)', text: '#5BC4A0', tag: `🍃 ${t('emotionCalm')}` };
-    case 'joy':
-      return { bg: 'rgba(123, 110, 246, 0.15)', text: '#7B6EF6', tag: `✨ ${t('emotionJoy')}` };
-    default:
-      return { bg: 'rgba(139, 130, 176, 0.15)', text: '#8B82B0', tag: `💭 ${t('emotionNeutral')}` };
-  }
+  const style =
+    MOCK_EMOTION_STYLES[emotion as keyof typeof MOCK_EMOTION_STYLES] ??
+    MOCK_EMOTION_STYLES.neutral;
+
+  return {
+    bg: style.bg,
+    text: style.text,
+    tag: `${style.icon} ${t(style.labelKey)}`,
+  };
 };
 
 function DreamDetailScreen({ route }: Props): React.JSX.Element {
@@ -37,21 +41,17 @@ function DreamDetailScreen({ route }: Props): React.JSX.Element {
   const dream = useDreamStore(state =>
     state.history.find(record => record.id === route.params.dreamId),
   );
-  
+
   const history = useDreamStore(state => state.history);
   const setHistory = useDreamStore(state => state.setHistory);
 
   // Helper to dynamically translate or fallback to custom strings
   const renderText = useCallback((textKey: string): string => {
     if (!textKey) return '';
-    const localizedKeys = [
-      'dreamOneTitle', 'dreamOneDate', 'dreamOneEmotion', 'dreamOneSummary', 'dreamOneContent', 'dreamOneInterpretation',
-      'dreamTwoTitle', 'dreamTwoDate', 'dreamTwoEmotion', 'dreamTwoSummary', 'dreamTwoContent', 'dreamTwoInterpretation',
-      'dreamDetailKicker', 'dreamDetailNotFoundTitle', 'dreamDetailDreamLabel', 'dreamDetailInterpretationLabel', 'dreamDetailMissingBody',
-      'commonToday'
-    ];
-    if (localizedKeys.includes(textKey)) {
-      return t(textKey as any);
+    if (
+      (MOCK_LOCALIZED_DREAM_TEXT_KEYS as readonly string[]).includes(textKey)
+    ) {
+      return t(textKey as keyof LocaleKeys);
     }
     return textKey;
   }, []);
@@ -60,7 +60,6 @@ function DreamDetailScreen({ route }: Props): React.JSX.Element {
     if (!dream) return;
     const updatedHistory = history.map(item => {
       if (item.id === dream.id) {
-        // @ts-ignore
         const isFav = !item.isFavorite;
         return { ...item, isFavorite: isFav };
       }
@@ -72,50 +71,40 @@ function DreamDetailScreen({ route }: Props): React.JSX.Element {
   // Predefined high-fidelity symbolisms fallback for seeds
   const getSymbolisms = () => {
     if (!dream) return [];
-    
-    // @ts-ignore
+
     if (dream.symbolism) return dream.symbolism;
 
-    if (dream.id === 'moon-garden') {
-      return [
-        { symbol: t('dreamDetailMoonSymbolOne'), meaning: t('dreamDetailMoonMeaningOne') },
-        { symbol: t('dreamDetailMoonSymbolTwo'), meaning: t('dreamDetailMoonMeaningTwo') },
-        { symbol: t('dreamDetailMoonSymbolThree'), meaning: t('dreamDetailMoonMeaningThree') },
-      ];
-    }
+    const detail =
+      MOCK_DREAM_DETAIL_BY_ID[
+        dream.id as keyof typeof MOCK_DREAM_DETAIL_BY_ID
+      ] ?? MOCK_DEFAULT_DREAM_DETAIL;
 
-    if (dream.id === 'orange-train') {
-      return [
-        { symbol: t('dreamDetailTrainSymbolOne'), meaning: t('dreamDetailTrainMeaningOne') },
-        { symbol: t('dreamDetailTrainSymbolTwo'), meaning: t('dreamDetailTrainMeaningTwo') },
-        { symbol: t('dreamDetailTrainSymbolThree'), meaning: t('dreamDetailTrainMeaningThree') },
-      ];
-    }
-
-    // Default basic fallback
-    return [
-      { symbol: t('dreamDetailDefaultSymbol'), meaning: t('dreamDetailDefaultMeaning') },
-    ];
+    return detail.symbols.map(symbol => ({
+      symbol: t(symbol.symbolKey),
+      meaning: t(symbol.meaningKey),
+    }));
   };
 
   const getTheme = () => {
     if (!dream) return '';
-    // @ts-ignore
     if (dream.interpretationKey) return renderText(dream.interpretationKey);
     return renderText(dream.titleKey);
   };
 
-  // @ts-ignore
   const isFavorite = dream ? !!dream.isFavorite : false;
-  // @ts-ignore
-  const confidenceScore = dream?.confidenceScore || (dream?.id === 'moon-garden' ? 92 : 88);
+  const dreamDetail = dream
+    ? MOCK_DREAM_DETAIL_BY_ID[
+        dream.id as keyof typeof MOCK_DREAM_DETAIL_BY_ID
+      ] ?? MOCK_DEFAULT_DREAM_DETAIL
+    : MOCK_DEFAULT_DREAM_DETAIL;
+  const confidenceScore = dream?.confidenceScore || dreamDetail.confidenceScore;
 
   const emoStyle = dream ? getEmotionStyles(dream.emotionKey) : null;
 
   return (
     <SafeAreaView style={styles.safeArea}>
       <StatusBar barStyle="light-content" />
-      
+
       {dream && emoStyle ? (
         <ScrollView
           contentContainerStyle={styles.content}
@@ -124,19 +113,20 @@ function DreamDetailScreen({ route }: Props): React.JSX.Element {
           {/* Custom detail header */}
           <View style={styles.headerBlock}>
             <View style={styles.headerBlockLeft}>
-              <Text style={styles.kicker}>{t('dreamDetailImmersiveKicker')}</Text>
+              <Text style={styles.kicker}>
+                {t('dreamDetailImmersiveKicker')}
+              </Text>
               <Text style={styles.title}>{renderText(dream.titleKey)}</Text>
             </View>
-            
+
             <Pressable
               accessibilityRole="button"
               onPress={handleToggleFavorite}
-              style={[
-                styles.favButton,
-                isFavorite && styles.favButtonActive
-              ]}
+              style={[styles.favButton, isFavorite && styles.favButtonActive]}
             >
-              <Text style={[styles.favIcon, isFavorite && styles.favIconActive]}>
+              <Text
+                style={[styles.favIcon, isFavorite && styles.favIconActive]}
+              >
                 {isFavorite ? '★' : '☆'}
               </Text>
             </Pressable>
@@ -145,10 +135,12 @@ function DreamDetailScreen({ route }: Props): React.JSX.Element {
           {/* Meta row */}
           <View style={styles.metaRow}>
             <Text style={styles.metaDate}>
-              {renderText(dream.createdAtKey)} · 07:02 AM
+              {renderText(dream.createdAtKey)} · {dreamDetail.createdTime}
             </Text>
-            
-            <View style={[styles.emotionChip, { backgroundColor: emoStyle.bg }]}>
+
+            <View
+              style={[styles.emotionChip, { backgroundColor: emoStyle.bg }]}
+            >
               <Text style={[styles.emotionText, { color: emoStyle.text }]}>
                 {emoStyle.tag}
               </Text>
@@ -158,7 +150,9 @@ function DreamDetailScreen({ route }: Props): React.JSX.Element {
           {/* Content panel */}
           <View style={styles.panel}>
             <Text style={styles.panelLabel}>{t('dreamDetailPanelLabel')}</Text>
-            <Text style={styles.bodyText}>{renderText(dream.dreamContentKey)}</Text>
+            <Text style={styles.bodyText}>
+              {renderText(dream.dreamContentKey)}
+            </Text>
           </View>
 
           {/* AI report panel */}
@@ -166,40 +160,48 @@ function DreamDetailScreen({ route }: Props): React.JSX.Element {
             <View style={styles.aiPanelHeader}>
               <View style={styles.aiPanelTitleRow}>
                 <Text style={styles.aiSparkle}>✨</Text>
-                <Text style={styles.aiPanelTitle}>{t('dreamDetailAiReportTitle')}</Text>
+                <Text style={styles.aiPanelTitle}>
+                  {t('dreamDetailAiReportTitle')}
+                </Text>
               </View>
-              <Text style={styles.aiConfidence}>{t('dreamDetailConfidencePrefix')} {confidenceScore}%</Text>
+              <Text style={styles.aiConfidence}>
+                {t('dreamDetailConfidencePrefix')} {confidenceScore}%
+              </Text>
             </View>
 
             {/* Core theme */}
             <View style={styles.aiSection}>
-              <Text style={styles.aiSectionLabel}>{t('dreamDetailCoreThemeLabel')}</Text>
+              <Text style={styles.aiSectionLabel}>
+                {t('dreamDetailCoreThemeLabel')}
+              </Text>
               <Text style={styles.aiSectionValue}>{getTheme()}</Text>
             </View>
 
             {/* Symbolisms */}
             <View style={styles.aiSection}>
-              <Text style={styles.aiSectionLabel}>{t('dreamDetailSymbolismLabel')}</Text>
+              <Text style={styles.aiSectionLabel}>
+                {t('dreamDetailSymbolismLabel')}
+              </Text>
               <View style={styles.symbolsList}>
-                {getSymbolisms().map((sym: { symbol: string; meaning: string }, idx: number) => (
-                  <View key={idx} style={styles.symbolCard}>
-                    <Text style={styles.symbolTitle}>「{sym.symbol}」</Text>
-                    <Text style={styles.symbolMeaning}>{sym.meaning}</Text>
-                  </View>
-                ))}
+                {getSymbolisms().map(
+                  (sym: { symbol: string; meaning: string }, idx: number) => (
+                    <View key={idx} style={styles.symbolCard}>
+                      <Text style={styles.symbolTitle}>「{sym.symbol}」</Text>
+                      <Text style={styles.symbolMeaning}>{sym.meaning}</Text>
+                    </View>
+                  ),
+                )}
               </View>
             </View>
 
             {/* Guidance */}
             <View style={styles.aiSection}>
-              <Text style={styles.aiSectionLabel}>{t('dreamDetailGuidanceLabel')}</Text>
+              <Text style={styles.aiSectionLabel}>
+                {t('dreamDetailGuidanceLabel')}
+              </Text>
               <View style={styles.guidanceCard}>
                 <Text style={styles.guidanceText}>
-                  {dream.id === 'moon-garden'
-                    ? t('dreamDetailGuidanceMoon')
-                    : dream.id === 'orange-train'
-                    ? t('dreamDetailGuidanceTrain')
-                    : t('dreamDetailGuidanceDefault')}
+                  {t(dreamDetail.guidanceKey)}
                 </Text>
               </View>
             </View>
@@ -208,7 +210,9 @@ function DreamDetailScreen({ route }: Props): React.JSX.Element {
       ) : (
         <View style={styles.notFoundContainer}>
           <Text style={styles.notFoundIcon}>⚠️</Text>
-          <Text style={styles.notFoundTitle}>{t('dreamDetailNotFoundTitle')}</Text>
+          <Text style={styles.notFoundTitle}>
+            {t('dreamDetailNotFoundTitle')}
+          </Text>
           <Text style={styles.notFoundText}>{t('dreamDetailMissingBody')}</Text>
         </View>
       )}

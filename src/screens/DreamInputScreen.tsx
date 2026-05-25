@@ -19,67 +19,35 @@ import Animated, {
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { t, useI18n } from '../lib/i18n';
+import {
+  MOCK_DREAM_EMOTIONS,
+  MOCK_EMOTION_STYLES,
+  type MockDreamEmotion,
+} from '../mocks/appMockData';
 import type { RootStackParamList } from '../navigation/AppNavigator';
 import { COLORS, TYPOGRAPHY } from '../types/theme';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'DreamInput'>;
 
-type EmotionType = 'joy' | 'calm' | 'anxiety' | 'nightmare' | 'neutral';
-
 const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
 
 // Helper function to return emotion-specific colors in React Native styles
-const getEmotionStyles = (emotion: EmotionType) => {
-  switch (emotion) {
-    case 'nightmare':
-      return {
-        bg: 'rgba(224, 107, 139, 0.15)',
-        border: 'rgba(224, 107, 139, 0.4)',
-        text: '#E06B8B',
-        icon: '👿',
-        label: t('emotionNightmare'),
-      };
-    case 'anxiety':
-      return {
-        bg: 'rgba(232, 155, 77, 0.15)',
-        border: 'rgba(232, 155, 77, 0.4)',
-        text: '#E89B4D',
-        icon: '🌪️',
-        label: t('emotionAnxiety'),
-      };
-    case 'calm':
-      return {
-        bg: 'rgba(91, 196, 160, 0.15)',
-        border: 'rgba(91, 196, 160, 0.4)',
-        text: '#5BC4A0',
-        icon: '🍃',
-        label: t('emotionCalm'),
-      };
-    case 'joy':
-      return {
-        bg: 'rgba(123, 110, 246, 0.15)',
-        border: 'rgba(123, 110, 246, 0.4)',
-        text: '#7B6EF6',
-        icon: '✨',
-        label: t('emotionJoy'),
-      };
-    default:
-      return {
-        bg: 'rgba(139, 130, 176, 0.15)',
-        border: 'rgba(139, 130, 176, 0.4)',
-        text: '#8B82B0',
-        icon: '💭',
-        label: t('emotionNeutral'),
-      };
-  }
+const getEmotionStyles = (emotion: MockDreamEmotion) => {
+  const style = MOCK_EMOTION_STYLES[emotion];
+
+  return {
+    ...style,
+    label: t(style.labelKey),
+  };
 };
 
 function DreamInputScreen({ navigation }: Props): React.JSX.Element {
   useI18n();
   const [dreamContent, setDreamContent] = useState('');
-  const [selectedEmotion, setSelectedEmotion] = useState<EmotionType>('joy');
+  const [selectedEmotion, setSelectedEmotion] =
+    useState<MockDreamEmotion>('joy');
   const [isFocused, setIsFocused] = useState(false);
-  
+
   const buttonScale = useSharedValue(1);
   const characterCount = dreamContent.length;
   const canAnalyze = characterCount > 0;
@@ -118,18 +86,15 @@ function DreamInputScreen({ navigation }: Props): React.JSX.Element {
     }
 
     // Navigate and pass both the content and selected emotion
-    navigation.navigate('DreamResult', { 
+    navigation.navigate('DreamResult', {
       dreamContent: trimmedDream,
-      // @ts-ignore (Optional extra parameter for custom stream theme)
-      emotion: selectedEmotion
+      emotion: selectedEmotion,
     });
   };
 
   const injectSmartTemplate = (): void => {
     setDreamContent(t('dreamInputSmartTemplate'));
   };
-
-  const emotionsList: EmotionType[] = ['joy', 'calm', 'anxiety', 'nightmare', 'neutral'];
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -144,16 +109,17 @@ function DreamInputScreen({ navigation }: Props): React.JSX.Element {
           showsVerticalScrollIndicator={false}
         >
           <View style={styles.header}>
-            <Text style={styles.kicker}>✨ {t('dreamInputImmersiveKicker')}</Text>
+            <Text style={styles.kicker}>
+              ✨ {t('dreamInputImmersiveKicker')}
+            </Text>
             <Text style={styles.title}>{t('dreamInputTitle')}</Text>
             <Text style={styles.subtitle}>{t('dreamInputSubtitle')}</Text>
           </View>
 
           {/* Immersive input textarea container */}
-          <View style={[
-            styles.inputPanel,
-            isFocused && styles.inputPanelFocused
-          ]}>
+          <View
+            style={[styles.inputPanel, isFocused && styles.inputPanelFocused]}
+          >
             <TextInput
               multiline
               onChangeText={setDreamContent}
@@ -167,16 +133,18 @@ function DreamInputScreen({ navigation }: Props): React.JSX.Element {
               value={dreamContent}
               maxLength={500}
             />
-            
+
             <View style={styles.inputFooter}>
               <Pressable
                 accessibilityRole="button"
                 onPress={injectSmartTemplate}
                 style={styles.polishButton}
               >
-                <Text style={styles.polishButtonText}>🪄 {t('dreamInputSmartInject')}</Text>
+                <Text style={styles.polishButtonText}>
+                  🪄 {t('dreamInputSmartInject')}
+                </Text>
               </Pressable>
-              
+
               <Text style={[styles.characterCount, { color: countTone }]}>
                 {characterCount}/500 {t('dreamInputCharacters')}
               </Text>
@@ -186,15 +154,19 @@ function DreamInputScreen({ navigation }: Props): React.JSX.Element {
           {/* Emotional selection chips */}
           <View style={styles.emotionSection}>
             <View style={styles.emotionHeader}>
-              <Text style={styles.emotionTitle}>{t('dreamInputEmotionQuestion')}</Text>
-              <Text style={styles.emotionMeta}>{t('dreamInputEmotionMotion')}</Text>
+              <Text style={styles.emotionTitle}>
+                {t('dreamInputEmotionQuestion')}
+              </Text>
+              <Text style={styles.emotionMeta}>
+                {t('dreamInputEmotionMotion')}
+              </Text>
             </View>
 
             <View style={styles.emotionGrid}>
-              {emotionsList.map((emo) => {
+              {MOCK_DREAM_EMOTIONS.map(emo => {
                 const isSelected = selectedEmotion === emo;
                 const emoStyle = getEmotionStyles(emo);
-                
+
                 return (
                   <Pressable
                     accessibilityRole="button"
@@ -202,22 +174,22 @@ function DreamInputScreen({ navigation }: Props): React.JSX.Element {
                     onPress={() => setSelectedEmotion(emo)}
                     style={[
                       styles.emotionChip,
-                      isSelected 
+                      isSelected
                         ? {
                             backgroundColor: emoStyle.bg,
                             borderColor: emoStyle.border,
                             transform: [{ scale: 1.05 }],
                           }
-                        : styles.emotionChipInactive
+                        : styles.emotionChipInactive,
                     ]}
                   >
                     <Text style={styles.emotionIcon}>{emoStyle.icon}</Text>
                     <Text
                       style={[
                         styles.emotionLabel,
-                        isSelected 
+                        isSelected
                           ? { color: emoStyle.text, fontWeight: '700' }
-                          : styles.emotionLabelInactive
+                          : styles.emotionLabelInactive,
                       ]}
                     >
                       {emoStyle.label}
@@ -249,9 +221,7 @@ function DreamInputScreen({ navigation }: Props): React.JSX.Element {
           {/* Informational Hint Card */}
           <View style={styles.hintCard}>
             <Text style={styles.hintIcon}>ℹ️</Text>
-            <Text style={styles.hintText}>
-              {t('dreamInputHint')}
-            </Text>
+            <Text style={styles.hintText}>{t('dreamInputHint')}</Text>
           </View>
         </ScrollView>
       </KeyboardAvoidingView>

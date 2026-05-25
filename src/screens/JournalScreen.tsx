@@ -14,12 +14,17 @@ import Animated, { FadeInDown } from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { t, useI18n } from '../lib/i18n';
+import {
+  MOCK_EMOTION_STYLES,
+  MOCK_JOURNAL_FILTERS,
+  MOCK_LOCALIZED_DREAM_TEXT_KEYS,
+  type MockEmotionFilter,
+} from '../mocks/appMockData';
 import type { RootStackParamList } from '../navigation/AppNavigator';
 import type { DreamRecord } from '../store/dreamStore';
 import { useDreamStore } from '../store/dreamStore';
+import type { LocaleKeys } from '../types/i18n';
 import { COLORS, TYPOGRAPHY } from '../types/theme';
-
-type EmotionType = 'all' | 'joy' | 'calm' | 'anxiety' | 'nightmare';
 
 type Props = {
   onNavigateToTab?: (tab: 'Home' | 'Journal' | 'Profile') => void;
@@ -27,93 +32,60 @@ type Props = {
 
 // Helper function to return emotion-specific colors
 const getEmotionStyles = (emotion: string) => {
-  switch (emotion) {
-    case 'nightmare':
-      return {
-        bg: 'rgba(224, 107, 139, 0.15)',
-        border: 'rgba(224, 107, 139, 0.4)',
-        text: '#E06B8B',
-        tag: `👿 ${t('emotionNightmare')}`,
-        colorCode: '#E06B8B',
-      };
-    case 'anxiety':
-      return {
-        bg: 'rgba(232, 155, 77, 0.15)',
-        border: 'rgba(232, 155, 77, 0.4)',
-        text: '#E89B4D',
-        tag: `🌪️ ${t('emotionAnxiety')}`,
-        colorCode: '#E89B4D',
-      };
-    case 'calm':
-      return {
-        bg: 'rgba(91, 196, 160, 0.15)',
-        border: 'rgba(91, 196, 160, 0.4)',
-        text: '#5BC4A0',
-        tag: `🍃 ${t('emotionCalm')}`,
-        colorCode: '#5BC4A0',
-      };
-    case 'joy':
-      return {
-        bg: 'rgba(123, 110, 246, 0.15)',
-        border: 'rgba(123, 110, 246, 0.4)',
-        text: '#7B6EF6',
-        tag: `✨ ${t('emotionJoy')}`,
-        colorCode: '#7B6EF6',
-      };
-    default:
-      return {
-        bg: 'rgba(139, 130, 176, 0.15)',
-        border: 'rgba(139, 130, 176, 0.4)',
-        text: '#8B82B0',
-        tag: `💭 ${t('emotionNeutral')}`,
-        colorCode: '#8B82B0',
-      };
-  }
+  const style =
+    MOCK_EMOTION_STYLES[emotion as keyof typeof MOCK_EMOTION_STYLES] ??
+    MOCK_EMOTION_STYLES.neutral;
+
+  return {
+    ...style,
+    tag: `${style.icon} ${t(style.labelKey)}`,
+  };
 };
 
 function JournalScreen({ onNavigateToTab }: Props): React.JSX.Element {
   const language = useI18n();
   const navigation =
     useNavigation<NativeStackNavigationProp<RootStackParamList>>();
-  
+
   const history = useDreamStore(state => state.history);
   const setHistory = useDreamStore(state => state.setHistory);
 
   // States for search and filters
   const [searchQuery, setSearchQuery] = useState('');
-  const [selectedFilter, setSelectedFilter] = useState<EmotionType>('all');
+  const [selectedFilter, setSelectedFilter] =
+    useState<MockEmotionFilter>('all');
 
   // Helper to dynamically translate or fallback to custom strings
   const renderText = useCallback((textKey: string): string => {
     if (!textKey) return '';
-    const localizedKeys = [
-      'dreamOneTitle', 'dreamOneDate', 'dreamOneEmotion', 'dreamOneSummary', 'dreamOneContent', 'dreamOneInterpretation',
-      'dreamTwoTitle', 'dreamTwoDate', 'dreamTwoEmotion', 'dreamTwoSummary', 'dreamTwoContent', 'dreamTwoInterpretation',
-      'journalKicker', 'journalTitle', 'journalSubtitle', 'commonToday'
-    ];
-    if (localizedKeys.includes(textKey)) {
-      return t(textKey as any);
+    if (
+      (MOCK_LOCALIZED_DREAM_TEXT_KEYS as readonly string[]).includes(textKey)
+    ) {
+      return t(textKey as keyof LocaleKeys);
     }
     return textKey;
   }, []);
 
-  const handleToggleFavorite = useCallback((id: string) => {
-    const updatedHistory = history.map(item => {
-      if (item.id === id) {
-        // Toggle simulated favorite flag by appending star emoji to title
-        // or toggle local custom attributes
-        // @ts-ignore
-        const isFav = !item.isFavorite;
-        return { ...item, isFavorite: isFav };
-      }
-      return item;
-    });
-    setHistory(updatedHistory);
-  }, [history, setHistory]);
+  const handleToggleFavorite = useCallback(
+    (id: string) => {
+      const updatedHistory = history.map(item => {
+        if (item.id === id) {
+          const isFav = !item.isFavorite;
+          return { ...item, isFavorite: isFav };
+        }
+        return item;
+      });
+      setHistory(updatedHistory);
+    },
+    [history, setHistory],
+  );
 
-  const handleDeleteDream = useCallback((id: string) => {
-    setHistory(history.filter(item => item.id !== id));
-  }, [history, setHistory]);
+  const handleDeleteDream = useCallback(
+    (id: string) => {
+      setHistory(history.filter(item => item.id !== id));
+    },
+    [history, setHistory],
+  );
 
   // Filtered entries list
   const filteredHistory = useMemo(() => {
@@ -121,49 +93,58 @@ function JournalScreen({ onNavigateToTab }: Props): React.JSX.Element {
       const title = renderText(item.titleKey).toLowerCase();
       const content = renderText(item.dreamContentKey).toLowerCase();
       const query = searchQuery.toLowerCase();
-      
+
       const matchesSearch = title.includes(query) || content.includes(query);
       if (!matchesSearch) return false;
-      
+
       if (selectedFilter === 'all') return true;
       return (item.emotionKey as string) === (selectedFilter as string);
     });
   }, [history, searchQuery, selectedFilter, renderText]);
 
   const renderItem = useCallback(
-    ({ item, index }: { item: DreamRecord; index: number }): React.JSX.Element => {
+    ({
+      item,
+      index,
+    }: {
+      item: DreamRecord;
+      index: number;
+    }): React.JSX.Element => {
       const emoStyle = getEmotionStyles(item.emotionKey);
-      
-      // Retrieve premium keywords & favorite state if present
-      // @ts-ignore
-      const keywords: string[] = item.aiKeywords || [
+
+      const keywords = item.aiKeywords || [
         t('journalKeywordSubconscious'),
         t('journalKeywordDreamSymbol'),
       ];
-      // @ts-ignore
       const isFavorite: boolean = !!item.isFavorite;
 
       return (
         <Animated.View entering={FadeInDown.delay(index * 80).duration(400)}>
           <Pressable
             accessibilityRole="button"
-            onPress={() => navigation.navigate('DreamDetail', { dreamId: item.id })}
-            style={[
-              styles.dreamCard,
-              { borderLeftColor: emoStyle.colorCode }
-            ]}
+            onPress={() =>
+              navigation.navigate('DreamDetail', { dreamId: item.id })
+            }
+            style={[styles.dreamCard, { borderLeftColor: emoStyle.colorCode }]}
           >
             <View style={styles.cardContent}>
               <View style={styles.cardTopRow}>
-                <Text style={styles.cardDate}>{renderText(item.createdAtKey)}</Text>
-                
+                <Text style={styles.cardDate}>
+                  {renderText(item.createdAtKey)}
+                </Text>
+
                 <View style={styles.actionButtons}>
                   <Pressable
                     accessibilityRole="button"
                     onPress={() => handleToggleFavorite(item.id)}
                     style={styles.cardActionIcon}
                   >
-                    <Text style={[styles.starEmoji, isFavorite && styles.starEmojiActive]}>
+                    <Text
+                      style={[
+                        styles.starEmoji,
+                        isFavorite && styles.starEmojiActive,
+                      ]}
+                    >
                       {isFavorite ? '★' : '☆'}
                     </Text>
                   </Pressable>
@@ -178,9 +159,21 @@ function JournalScreen({ onNavigateToTab }: Props): React.JSX.Element {
               </View>
 
               <View style={styles.cardMetaRow}>
-                <Text style={styles.cardTitle}>{renderText(item.titleKey)}</Text>
-                <View style={[styles.emotionChip, { backgroundColor: emoStyle.bg, borderColor: emoStyle.border }]}>
-                  <Text style={[styles.emotionText, { color: emoStyle.colorCode }]}>
+                <Text style={styles.cardTitle}>
+                  {renderText(item.titleKey)}
+                </Text>
+                <View
+                  style={[
+                    styles.emotionChip,
+                    {
+                      backgroundColor: emoStyle.bg,
+                      borderColor: emoStyle.border,
+                    },
+                  ]}
+                >
+                  <Text
+                    style={[styles.emotionText, { color: emoStyle.colorCode }]}
+                  >
                     {emoStyle.tag}
                   </Text>
                 </View>
@@ -193,34 +186,30 @@ function JournalScreen({ onNavigateToTab }: Props): React.JSX.Element {
               {/* Bottom tag chips */}
               <View style={styles.cardFooter}>
                 <View style={styles.tagsContainer}>
-                  {keywords.map((tag) => (
+                  {keywords.map(tag => (
                     <View key={tag} style={styles.tagBadge}>
-                      <Text style={styles.tagBadgeText}>#{tag}</Text>
+                      <Text style={styles.tagBadgeText}>
+                        #{renderText(tag)}
+                      </Text>
                     </View>
                   ))}
                 </View>
-                <Text style={styles.modelTierText}>{t('journalModelTier')}</Text>
+                <Text style={styles.modelTierText}>
+                  {t('journalModelTier')}
+                </Text>
               </View>
             </View>
           </Pressable>
         </Animated.View>
       );
     },
-    [navigation, handleToggleFavorite, handleDeleteDream, renderText]
+    [navigation, handleToggleFavorite, handleDeleteDream, renderText],
   );
-
-  const filterOptions: Array<{ key: EmotionType; label: string; emoji: string }> = [
-    { key: 'all', label: t('journalFilterAll'), emoji: '🌌' },
-    { key: 'joy', label: t('emotionJoy'), emoji: '✨' },
-    { key: 'calm', label: t('emotionCalm'), emoji: '🍃' },
-    { key: 'anxiety', label: t('emotionAnxiety'), emoji: '🌪' },
-    { key: 'nightmare', label: t('emotionNightmare'), emoji: '👿' },
-  ];
 
   return (
     <SafeAreaView style={styles.safeArea}>
       <StatusBar barStyle="light-content" />
-      
+
       {/* Header bar */}
       <View style={styles.header}>
         <Text style={styles.kicker}>{t('journalKicker')}</Text>
@@ -254,7 +243,7 @@ function JournalScreen({ onNavigateToTab }: Props): React.JSX.Element {
         <FlatList
           horizontal
           showsHorizontalScrollIndicator={false}
-          data={filterOptions}
+          data={MOCK_JOURNAL_FILTERS}
           contentContainerStyle={styles.filterList}
           keyExtractor={item => item.key}
           renderItem={({ item }) => {
@@ -265,12 +254,19 @@ function JournalScreen({ onNavigateToTab }: Props): React.JSX.Element {
                 onPress={() => setSelectedFilter(item.key)}
                 style={[
                   styles.filterChip,
-                  isSelected ? styles.filterChipActive : styles.filterChipInactive
+                  isSelected
+                    ? styles.filterChipActive
+                    : styles.filterChipInactive,
                 ]}
               >
                 <Text style={styles.filterEmoji}>{item.emoji}</Text>
-                <Text style={[styles.filterText, isSelected && styles.filterTextActive]}>
-                  {item.label}
+                <Text
+                  style={[
+                    styles.filterText,
+                    isSelected && styles.filterTextActive,
+                  ]}
+                >
+                  {item.labelKey ? t(item.labelKey) : item.label}
                 </Text>
               </Pressable>
             );

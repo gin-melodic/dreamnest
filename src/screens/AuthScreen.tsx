@@ -18,6 +18,7 @@ import Animated, {
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { t, useI18n } from '../lib/i18n';
+import { MOCK_AUTH } from '../mocks/appMockData';
 import { useAuthStore } from '../store/authStore';
 import { COLORS, TYPOGRAPHY } from '../types/theme';
 
@@ -27,7 +28,7 @@ function createDemoUser(email: string): User {
   const timestamp = new Date().toISOString();
 
   return {
-    id: 'demo-user',
+    id: MOCK_AUTH.demoUserId,
     aud: 'authenticated',
     role: 'authenticated',
     email,
@@ -49,7 +50,7 @@ function createDemoUser(email: string): User {
 
 function AuthScreen(): React.JSX.Element {
   useI18n();
-  const [email, setEmail] = useState('demo@dreamnest.app');
+  const [email, setEmail] = useState<string>(MOCK_AUTH.defaultEmail);
   const [password, setPassword] = useState('');
   const setUser = useAuthStore(state => state.setUser);
   const setBackendToken = useAuthStore(state => state.setBackendToken);
@@ -71,23 +72,33 @@ function AuthScreen(): React.JSX.Element {
   };
 
   const handleContinue = (): void => {
-    const normalizedEmail = email.trim() || 'demo@dreamnest.app';
+    const normalizedEmail = email.trim() || MOCK_AUTH.fallbackEmail;
 
     setUser(createDemoUser(normalizedEmail));
-    setBackendToken('demo-backend-token');
+    setBackendToken(MOCK_AUTH.backendToken);
   };
 
   return (
     <SafeAreaView style={styles.safeArea}>
       <StatusBar barStyle="light-content" />
-      
+
       {/* Immersive Space Nebula Ambient Glows */}
       <View pointerEvents="none" style={StyleSheet.absoluteFill}>
         <View style={styles.glowLeft} />
         <View style={styles.glowRight} />
         <View style={[styles.dustParticle, { top: '15%', left: '20%' }]} />
-        <View style={[styles.dustParticle, { top: '40%', right: '15%', width: 6, height: 6 }]} />
-        <View style={[styles.dustParticle, { bottom: '25%', left: '30%', width: 3, height: 3 }]} />
+        <View
+          style={[
+            styles.dustParticle,
+            { top: '40%', right: '15%', width: 6, height: 6 },
+          ]}
+        />
+        <View
+          style={[
+            styles.dustParticle,
+            { bottom: '25%', left: '30%', width: 3, height: 3 },
+          ]}
+        />
       </View>
 
       <KeyboardAvoidingView
@@ -111,10 +122,7 @@ function AuthScreen(): React.JSX.Element {
               placeholder={t('authEmailPlaceholder')}
               placeholderTextColor={COLORS.textFaint}
               selectionColor={COLORS.primaryAccent}
-              style={[
-                styles.input,
-                isEmailFocused && styles.inputFocused
-              ]}
+              style={[styles.input, isEmailFocused && styles.inputFocused]}
               onFocus={() => setIsEmailFocused(true)}
               onBlur={() => setIsEmailFocused(false)}
               value={email}
@@ -127,10 +135,7 @@ function AuthScreen(): React.JSX.Element {
               placeholderTextColor={COLORS.textFaint}
               secureTextEntry
               selectionColor={COLORS.primaryAccent}
-              style={[
-                styles.input,
-                isPasswordFocused && styles.inputFocused
-              ]}
+              style={[styles.input, isPasswordFocused && styles.inputFocused]}
               onFocus={() => setIsPasswordFocused(true)}
               onBlur={() => setIsPasswordFocused(false)}
               value={password}
@@ -143,7 +148,9 @@ function AuthScreen(): React.JSX.Element {
               onPressOut={handlePressOut}
               style={[styles.primaryButton, animatedButtonStyle]}
             >
-              <Text style={styles.primaryButtonText}>{t('authContinue')} 🔮</Text>
+              <Text style={styles.primaryButtonText}>
+                {t('authContinue')} 🔮
+              </Text>
             </AnimatedPressable>
 
             <Text style={styles.helperText}>{t('authHelper')}</Text>

@@ -20,7 +20,9 @@ import Animated, {
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { t, useI18n } from '../lib/i18n';
+import { MOCK_HOME_EMOTION_WAVES } from '../mocks/appMockData';
 import type { RootStackParamList } from '../navigation/AppNavigator';
+import type { LocaleKeys } from '../types/i18n';
 import { COLORS, TYPOGRAPHY } from '../types/theme';
 import { useDreamStore } from '../store/dreamStore';
 
@@ -34,14 +36,14 @@ function HomeScreen({ onNavigateToTab }: Props): React.JSX.Element {
   const language = useI18n();
   const navigation =
     useNavigation<NativeStackNavigationProp<RootStackParamList>>();
-  
+
   const history = useDreamStore(state => state.history);
-  
+
   // Animation hooks
   const buttonScale = useSharedValue(1);
   const sparkleRotation = useSharedValue(0);
   const breathScale = useSharedValue(1);
-  
+
   const animatedButtonStyle = useAnimatedStyle(() => ({
     transform: [{ scale: buttonScale.value }],
   }));
@@ -58,15 +60,15 @@ function HomeScreen({ onNavigateToTab }: Props): React.JSX.Element {
     sparkleRotation.value = withRepeat(
       withTiming(360, { duration: 8000 }),
       -1,
-      false
+      false,
     );
     breathScale.value = withRepeat(
       withSequence(
         withTiming(1.05, { duration: 2500 }),
-        withTiming(1.0, { duration: 2500 })
+        withTiming(1.0, { duration: 2500 }),
       ),
       -1,
-      true
+      true,
     );
   }, [sparkleRotation, breathScale]);
 
@@ -82,6 +84,9 @@ function HomeScreen({ onNavigateToTab }: Props): React.JSX.Element {
     navigation.navigate('DreamInput');
   };
 
+  const renderMockText = (textKey: string): string =>
+    t(textKey as keyof LocaleKeys);
+
   // Helper to format today's date in a premium way
   const getPremiumDateString = (): string => {
     const today = new Date();
@@ -93,27 +98,26 @@ function HomeScreen({ onNavigateToTab }: Props): React.JSX.Element {
     return `${formattedDate} · ${t('homeDateSuffix')}`;
   };
 
-  // Mock emotional wave heights for 7 days
-  const EMOTIONAL_WAVES = [
-    { label: '05-18', height: 42, color: COLORS.primaryAccent },
-    { label: '05-19', height: 78, color: COLORS.primaryAccent },
-    { label: '05-20', height: 58, color: COLORS.primaryAccent },
-    { label: '05-21', height: 92, color: COLORS.secondaryAccent, highlight: true },
-    { label: '05-22', height: 64, color: COLORS.primaryAccent },
-    { label: '05-23', height: 86, color: COLORS.primaryAccent },
-    { label: t('commonToday'), height: 96, color: COLORS.success },
-  ];
-
   return (
     <SafeAreaView style={styles.safeArea}>
       <StatusBar barStyle="light-content" />
-      
+
       {/* Immersive Space Nebula Ambient Glows */}
       <View pointerEvents="none" style={StyleSheet.absoluteFill}>
         <View style={styles.glowTopLeft} />
         <View style={styles.glowBottomRight} />
-        <View style={[styles.dustParticle, { top: '25%', right: '20%', opacity: 0.15 }]} />
-        <View style={[styles.dustParticle, { bottom: '35%', left: '15%', opacity: 0.2, width: 3, height: 3 }]} />
+        <View
+          style={[
+            styles.dustParticle,
+            { top: '25%', right: '20%', opacity: 0.15 },
+          ]}
+        />
+        <View
+          style={[
+            styles.dustParticle,
+            { bottom: '35%', left: '15%', opacity: 0.2, width: 3, height: 3 },
+          ]}
+        />
       </View>
 
       <ScrollView
@@ -129,13 +133,15 @@ function HomeScreen({ onNavigateToTab }: Props): React.JSX.Element {
               <Text style={styles.sparkleEmoji}>✨</Text>
             </View>
           </View>
-          
+
           <Pressable
             accessibilityRole="button"
             onPress={() => onNavigateToTab?.('Profile')}
             style={styles.avatarContainer}
           >
-            <Animated.View style={[styles.avatarGradientBorder, animatedBreathStyle]}>
+            <Animated.View
+              style={[styles.avatarGradientBorder, animatedBreathStyle]}
+            >
               <View style={styles.avatarInner}>
                 <Text style={styles.avatarEmoji}>👤</Text>
               </View>
@@ -156,16 +162,16 @@ function HomeScreen({ onNavigateToTab }: Props): React.JSX.Element {
             <View style={styles.ctaTagContainer}>
               <Text style={styles.ctaTag}>{t('homeCtaTag')}</Text>
             </View>
-            <Animated.View style={[styles.sparkleSpinner, animatedSparkleStyle]}>
+            <Animated.View
+              style={[styles.sparkleSpinner, animatedSparkleStyle]}
+            >
               <Text style={styles.sparkleSpinnerText}>✨</Text>
             </Animated.View>
           </View>
-          
+
           <Text style={styles.ctaTitle}>{t('homeCtaTitle')}</Text>
-          <Text style={styles.ctaSubtitle}>
-            {t('homeCtaSubtitle')}
-          </Text>
-          
+          <Text style={styles.ctaSubtitle}>{t('homeCtaSubtitle')}</Text>
+
           <View style={styles.ctaFooter}>
             <Text style={styles.ctaFooterText}>{t('homeCtaFooter')}</Text>
             <Text style={styles.ctaChevron}>›</Text>
@@ -176,25 +182,36 @@ function HomeScreen({ onNavigateToTab }: Props): React.JSX.Element {
         {history.length > 0 && (
           <Pressable
             accessibilityRole="button"
-            onPress={() => navigation.navigate('DreamDetail', { dreamId: history[0].id })}
+            onPress={() =>
+              navigation.navigate('DreamDetail', { dreamId: history[0].id })
+            }
             style={styles.recommendationCard}
           >
             <View style={styles.recHeader}>
               <View style={styles.recLabelRow}>
                 <Text style={styles.recIcon}>🌙</Text>
-                <Text style={styles.recLabel}>{t('homeRecommendationLabel')}</Text>
+                <Text style={styles.recLabel}>
+                  {t('homeRecommendationLabel')}
+                </Text>
               </View>
-              <Text style={styles.recScore}>{t('homeRecommendationScore')}</Text>
+              <Text style={styles.recScore}>
+                {t('homeRecommendationScore')}
+              </Text>
             </View>
-            
-            <Text style={styles.recTitle}>{t(history[0].titleKey)}</Text>
-            <Text style={styles.recBody} numberOfLines={2}>
-              {t(history[0].interpretationKey)}
+
+            <Text style={styles.recTitle}>
+              {renderMockText(history[0].titleKey)}
             </Text>
-            
+            <Text style={styles.recBody} numberOfLines={2}>
+              {renderMockText(history[0].interpretationKey)}
+            </Text>
+
             <View style={styles.recFooter}>
-              <Text style={[styles.recEmotion, { color: history[0].emotionColor }]}>
-                {t('homeRecommendationEmotionPrefix')}{t(history[0].emotionKey)}
+              <Text
+                style={[styles.recEmotion, { color: history[0].emotionColor }]}
+              >
+                {t('homeRecommendationEmotionPrefix')}
+                {renderMockText(history[0].emotionKey)}
               </Text>
               <Text style={styles.recTier}>{t('homeRecommendationTier')}</Text>
             </View>
@@ -215,7 +232,7 @@ function HomeScreen({ onNavigateToTab }: Props): React.JSX.Element {
             <View style={styles.chartBadge}>
               <Text style={styles.chartBadgeText}>{t('homeChartBadge')}</Text>
             </View>
-            
+
             {/* Grid Line simulation */}
             <View style={styles.chartGrid}>
               <View style={styles.gridLine} />
@@ -224,7 +241,7 @@ function HomeScreen({ onNavigateToTab }: Props): React.JSX.Element {
             </View>
 
             <View style={styles.barsContainer}>
-              {EMOTIONAL_WAVES.map((item, idx) => (
+              {MOCK_HOME_EMOTION_WAVES.map((item, idx) => (
                 <View key={idx} style={styles.barColumn}>
                   <View style={styles.barBackground}>
                     <View
@@ -234,12 +251,21 @@ function HomeScreen({ onNavigateToTab }: Props): React.JSX.Element {
                           height: `${item.height}%`,
                           backgroundColor: item.color,
                         },
-                        item.highlight && styles.highlightedBarFill
+                        'highlight' in item &&
+                          item.highlight &&
+                          styles.highlightedBarFill,
                       ]}
                     />
                   </View>
-                  <Text style={[styles.barLabel, item.highlight && styles.highlightedBarLabel]}>
-                    {item.label}
+                  <Text
+                    style={[
+                      styles.barLabel,
+                      'highlight' in item &&
+                        item.highlight &&
+                        styles.highlightedBarLabel,
+                    ]}
+                  >
+                    {'labelKey' in item ? t(item.labelKey) : item.label}
                   </Text>
                 </View>
               ))}
@@ -252,7 +278,7 @@ function HomeScreen({ onNavigateToTab }: Props): React.JSX.Element {
           <Text style={styles.carouselTitle}>
             {t('homeCarouselTitle')} ({history.length})
           </Text>
-          
+
           <ScrollView
             horizontal
             showsHorizontalScrollIndicator={false}
@@ -262,15 +288,19 @@ function HomeScreen({ onNavigateToTab }: Props): React.JSX.Element {
               <Pressable
                 accessibilityRole="button"
                 key={item.id}
-                onPress={() => navigation.navigate('DreamDetail', { dreamId: item.id })}
+                onPress={() =>
+                  navigation.navigate('DreamDetail', { dreamId: item.id })
+                }
                 style={styles.carouselCard}
               >
                 <View style={styles.cardHeader}>
-                  <Text style={styles.cardDate}>{t(item.createdAtKey)}</Text>
+                  <Text style={styles.cardDate}>
+                    {renderMockText(item.createdAtKey)}
+                  </Text>
                   <Text style={styles.cardStar}>★</Text>
                 </View>
                 <Text style={styles.cardTitle} numberOfLines={1}>
-                  {t(item.titleKey)}
+                  {renderMockText(item.titleKey)}
                 </Text>
                 <View style={styles.cardFooter}>
                   <View
@@ -279,11 +309,18 @@ function HomeScreen({ onNavigateToTab }: Props): React.JSX.Element {
                       { backgroundColor: `${item.emotionColor}20` },
                     ]}
                   >
-                    <Text style={[styles.emotionTagText, { color: item.emotionColor }]}>
-                      {t(item.emotionKey)}
+                    <Text
+                      style={[
+                        styles.emotionTagText,
+                        { color: item.emotionColor },
+                      ]}
+                    >
+                      {renderMockText(item.emotionKey)}
                     </Text>
                   </View>
-                  <Text style={styles.lucidityLabel}>{t('homeLucidityHigh')}</Text>
+                  <Text style={styles.lucidityLabel}>
+                    {t('homeLucidityHigh')}
+                  </Text>
                 </View>
               </Pressable>
             ))}

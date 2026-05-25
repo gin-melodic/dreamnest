@@ -20,10 +20,9 @@ import Animated, {
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { t, useI18n } from '../lib/i18n';
+import { MOCK_PROFILE, type MockArchetypeKey } from '../mocks/appMockData';
 import type { RootStackParamList } from '../navigation/AppNavigator';
 import { COLORS, TYPOGRAPHY } from '../types/theme';
-
-type ArchetypeKey = 'self' | 'persona' | 'shadow' | 'anima' | 'sage';
 
 function ProfileScreen(): React.JSX.Element {
   useI18n();
@@ -31,7 +30,9 @@ function ProfileScreen(): React.JSX.Element {
     useNavigation<NativeStackNavigationProp<RootStackParamList>>();
 
   // Selected Jungian Archetype
-  const [selectedArchetype, setSelectedArchetype] = useState<ArchetypeKey>('self');
+  const [selectedArchetype, setSelectedArchetype] = useState<MockArchetypeKey>(
+    MOCK_PROFILE.defaultArchetype,
+  );
 
   // Animation hooks
   const mandalaRotation = useSharedValue(0);
@@ -53,65 +54,22 @@ function ProfileScreen(): React.JSX.Element {
         easing: Easing.linear,
       }),
       -1,
-      false
+      false,
     );
 
     // Pulse core
     coreScale.value = withRepeat(
       withSequence(
         withTiming(1.04, { duration: 2000 }),
-        withTiming(1.0, { duration: 2000 })
+        withTiming(1.0, { duration: 2000 }),
       ),
       -1,
-      true
+      true,
     );
   }, [mandalaRotation, coreScale]);
 
-  // Archetypes definitions
-  const archetypes = {
-    self: {
-      title: t('profileArchetypeSelfTitle'),
-      ratio: "84%",
-      text: t('profileArchetypeSelfText'),
-      color: "#F0A86E",
-      border: "rgba(240, 168, 110, 0.4)",
-      bg: "rgba(240, 168, 110, 0.08)",
-    },
-    persona: {
-      title: t('profileArchetypePersonaTitle'),
-      ratio: "65%",
-      text: t('profileArchetypePersonaText'),
-      color: "#7B6EF6",
-      border: "rgba(123, 110, 246, 0.4)",
-      bg: "rgba(123, 110, 246, 0.08)",
-    },
-    shadow: {
-      title: t('profileArchetypeShadowTitle'),
-      ratio: "48%",
-      text: t('profileArchetypeShadowText'),
-      color: "#E06B8B",
-      border: "rgba(224, 107, 139, 0.4)",
-      bg: "rgba(224, 107, 139, 0.08)",
-    },
-    anima: {
-      title: t('profileArchetypeAnimaTitle'),
-      ratio: "72%",
-      text: t('profileArchetypeAnimaText'),
-      color: "#5BC4A0",
-      border: "rgba(91, 196, 160, 0.4)",
-      bg: "rgba(91, 196, 160, 0.08)",
-    },
-    sage: {
-      title: t('profileArchetypeSageTitle'),
-      ratio: "58%",
-      text: t('profileArchetypeSageText'),
-      color: "#E89B4D",
-      border: "rgba(232, 155, 77, 0.4)",
-      bg: "rgba(232, 155, 77, 0.08)",
-    },
-  };
-
-  const activeA = archetypes[selectedArchetype];
+  const activeA = MOCK_PROFILE.archetypes[selectedArchetype];
+  const integrationRatioText = `${MOCK_PROFILE.integrationRatio}%` as const;
   const handleOpenSettings = (): void => {
     navigation.navigate('Settings');
   };
@@ -141,8 +99,16 @@ function ProfileScreen(): React.JSX.Element {
         {/* Concentric Rotating Star Self Mandala */}
         <View style={styles.mandalaWrapper}>
           {/* Animated concentric rings */}
-          <Animated.View style={[styles.mandalaOuterRing, animatedMandalaStyle]} />
-          <Animated.View style={[styles.mandalaInnerRing, animatedMandalaStyle, { transform: [{ rotate: '-60deg' }] }]} />
+          <Animated.View
+            style={[styles.mandalaOuterRing, animatedMandalaStyle]}
+          />
+          <Animated.View
+            style={[
+              styles.mandalaInnerRing,
+              animatedMandalaStyle,
+              { transform: [{ rotate: '-60deg' }] },
+            ]}
+          />
 
           {/* Archetype static nodes on rings */}
           <View style={styles.nodesContainer}>
@@ -153,7 +119,7 @@ function ProfileScreen(): React.JSX.Element {
               style={[
                 styles.archetypeNode,
                 { top: 10 },
-                selectedArchetype === 'persona' && styles.archetypeNodeActive
+                selectedArchetype === 'persona' && styles.archetypeNodeActive,
               ]}
             >
               <Text style={styles.nodeEmoji}>🎭</Text>
@@ -166,7 +132,7 @@ function ProfileScreen(): React.JSX.Element {
               style={[
                 styles.archetypeNode,
                 { bottom: 10 },
-                selectedArchetype === 'shadow' && styles.archetypeNodeActive
+                selectedArchetype === 'shadow' && styles.archetypeNodeActive,
               ]}
             >
               <Text style={styles.nodeEmoji}>👿</Text>
@@ -179,7 +145,7 @@ function ProfileScreen(): React.JSX.Element {
               style={[
                 styles.archetypeNode,
                 { left: 10 },
-                selectedArchetype === 'anima' && styles.archetypeNodeActive
+                selectedArchetype === 'anima' && styles.archetypeNodeActive,
               ]}
             >
               <Text style={styles.nodeEmoji}>🍃</Text>
@@ -192,7 +158,7 @@ function ProfileScreen(): React.JSX.Element {
               style={[
                 styles.archetypeNode,
                 { right: 10 },
-                selectedArchetype === 'sage' && styles.archetypeNodeActive
+                selectedArchetype === 'sage' && styles.archetypeNodeActive,
               ]}
             >
               <Text style={styles.nodeEmoji}>🦉</Text>
@@ -203,7 +169,7 @@ function ProfileScreen(): React.JSX.Element {
           <Animated.View style={[styles.mandalaCore, animatedCoreStyle]}>
             <View style={styles.mandalaCoreInner}>
               <Text style={styles.coreSparkle}>✨</Text>
-              <Text style={styles.corePercentage}>84%</Text>
+              <Text style={styles.corePercentage}>{integrationRatioText}</Text>
             </View>
           </Animated.View>
         </View>
@@ -212,14 +178,28 @@ function ProfileScreen(): React.JSX.Element {
         <View style={styles.integrationPanel}>
           <View style={styles.integrationHeader}>
             <View style={styles.coherenceRow}>
-              <View style={[styles.coherenceIndicatorDot, { backgroundColor: COLORS.success }]} />
-              <Text style={styles.integrationLabel}>{t('profileIntegrationLabel')}</Text>
+              <View
+                style={[
+                  styles.coherenceIndicatorDot,
+                  { backgroundColor: COLORS.success },
+                ]}
+              />
+              <Text style={styles.integrationLabel}>
+                {t('profileIntegrationLabel')}
+              </Text>
             </View>
-            <Text style={[styles.integrationValue, { color: COLORS.success }]}>{t('profileIntegrationValue')}</Text>
+            <Text style={[styles.integrationValue, { color: COLORS.success }]}>
+              {t('profileIntegrationValue')}
+            </Text>
           </View>
 
           <View style={styles.integrationBarBg}>
-            <View style={[styles.integrationBarFill, { width: '84%' }]} />
+            <View
+              style={[
+                styles.integrationBarFill,
+                { width: integrationRatioText as `${number}%` },
+              ]}
+            />
           </View>
 
           <Text style={styles.integrationDescription}>
@@ -230,53 +210,54 @@ function ProfileScreen(): React.JSX.Element {
         {/* Archetypes selectors and details breakout */}
         <View style={styles.archetypeSection}>
           <View style={styles.sectionHeader}>
-            <Text style={styles.sectionTitle}>{t('profileArchetypeSectionTitle')}</Text>
-            <Text style={styles.sectionMeta}>{t('profileArchetypeSectionMeta')}</Text>
+            <Text style={styles.sectionTitle}>
+              {t('profileArchetypeSectionTitle')}
+            </Text>
+            <Text style={styles.sectionMeta}>
+              {t('profileArchetypeSectionMeta')}
+            </Text>
           </View>
 
           {/* Tab Selector buttons */}
           <View style={styles.archetypeTabsGrid}>
-            {[
-              { key: 'self', label: t('profileArchetypeSelfTab'), emoji: '✨' },
-              { key: 'persona', label: t('profileArchetypePersonaTab'), emoji: '🎭' },
-              { key: 'shadow', label: t('profileArchetypeShadowTab'), emoji: '👿' },
-              { key: 'anima', label: t('profileArchetypeAnimaTab'), emoji: '🍃' },
-              { key: 'sage', label: t('profileArchetypeSageTab'), emoji: '🦉' },
-            ].map(tab => (
+            {Object.entries(MOCK_PROFILE.archetypes).map(([key, tab]) => (
               <Pressable
                 accessibilityRole="button"
-                key={tab.key}
-                onPress={() => setSelectedArchetype(tab.key as ArchetypeKey)}
+                key={key}
+                onPress={() => setSelectedArchetype(key as MockArchetypeKey)}
                 style={[
                   styles.archetypeTab,
-                  selectedArchetype === tab.key && styles.archetypeTabActive
+                  selectedArchetype === key && styles.archetypeTabActive,
                 ]}
               >
                 <Text style={styles.archetypeTabEmoji}>{tab.emoji}</Text>
-                <Text style={styles.archetypeTabLabel}>{tab.label}</Text>
+                <Text style={styles.archetypeTabLabel}>{t(tab.tabKey)}</Text>
               </Pressable>
             ))}
           </View>
 
           {/* Active Detail break card */}
-          <View style={[
-            styles.archetypeDetailCard,
-            { borderColor: activeA.border, backgroundColor: activeA.bg }
-          ]}>
+          <View
+            style={[
+              styles.archetypeDetailCard,
+              { borderColor: activeA.border, backgroundColor: activeA.bg },
+            ]}
+          >
             <View style={styles.detailCardHeader}>
               <Text style={[styles.detailTitle, { color: activeA.color }]}>
-                {activeA.title}
+                {t(activeA.titleKey)}
               </Text>
               <View style={styles.detailCardBadge}>
-                <Text style={[styles.detailCardBadgeText, { color: activeA.color }]}>
-                  {t('profileArchetypeRatioPrefix')} {activeA.ratio}
+                <Text
+                  style={[styles.detailCardBadgeText, { color: activeA.color }]}
+                >
+                  {t('profileArchetypeRatioPrefix')} {activeA.ratio}%
                 </Text>
               </View>
             </View>
-            <Text style={styles.detailDescription}>{activeA.text}</Text>
+            <Text style={styles.detailDescription}>{t(activeA.textKey)}</Text>
           </View>
         </View>
-
       </ScrollView>
     </SafeAreaView>
   );

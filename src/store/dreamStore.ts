@@ -1,16 +1,20 @@
 import { create } from 'zustand';
 
 import type { LocaleKeys } from '../types/i18n';
-import { COLORS } from '../types/theme';
+import { MOCK_DREAM_HISTORY, type MockSymbol } from '../mocks/appMockData';
 
 export type DreamRecord = {
   id: string;
-  titleKey: keyof LocaleKeys;
-  dreamContentKey: keyof LocaleKeys;
-  interpretationKey: keyof LocaleKeys;
-  emotionKey: keyof LocaleKeys;
+  titleKey: keyof LocaleKeys | string;
+  dreamContentKey: keyof LocaleKeys | string;
+  interpretationKey: keyof LocaleKeys | string;
+  emotionKey: keyof LocaleKeys | string;
   emotionColor: string;
-  createdAtKey: keyof LocaleKeys;
+  createdAtKey: keyof LocaleKeys | string;
+  aiKeywords?: Array<keyof LocaleKeys | string>;
+  symbolism?: MockSymbol[];
+  confidenceScore?: number;
+  isFavorite?: boolean;
 };
 
 type DreamState = {
@@ -23,26 +27,10 @@ type DreamState = {
   clearStream: () => void;
 };
 
-const INITIAL_HISTORY: DreamRecord[] = [
-  {
-    id: 'moon-garden',
-    titleKey: 'dreamOneTitle',
-    dreamContentKey: 'dreamOneContent',
-    interpretationKey: 'dreamOneInterpretation',
-    emotionKey: 'dreamOneEmotion',
-    emotionColor: COLORS.primaryAccent,
-    createdAtKey: 'dreamOneDate',
-  },
-  {
-    id: 'orange-train',
-    titleKey: 'dreamTwoTitle',
-    dreamContentKey: 'dreamTwoContent',
-    interpretationKey: 'dreamTwoInterpretation',
-    emotionKey: 'dreamTwoEmotion',
-    emotionColor: COLORS.secondaryAccent,
-    createdAtKey: 'dreamTwoDate',
-  },
-];
+const INITIAL_HISTORY: DreamRecord[] = MOCK_DREAM_HISTORY.map(item => ({
+  ...item,
+  aiKeywords: [...item.aiKeywords],
+}));
 
 export const useDreamStore = create<DreamState>(set => ({
   streamingContent: '',
