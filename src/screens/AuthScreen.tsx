@@ -1,6 +1,6 @@
-import type { User } from '@supabase/supabase-js';
 import React, { useState } from 'react';
 import {
+  ActivityIndicator,
   KeyboardAvoidingView,
   Platform,
   Pressable,
@@ -17,47 +17,33 @@ import Animated, {
 } from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
+import {
+  exchangeSupabaseToken,
+  signInWithEmail,
+  signUpWithEmail,
+} from '../api/auth';
 import { t, useI18n } from '../lib/i18n';
-import { MOCK_AUTH } from '../mocks/appMockData';
 import { useAuthStore } from '../store/authStore';
 import { COLORS, TYPOGRAPHY } from '../types/theme';
 
 const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
 
-function createDemoUser(email: string): User {
-  const timestamp = new Date().toISOString();
-
-  return {
-    id: MOCK_AUTH.demoUserId,
-    aud: 'authenticated',
-    role: 'authenticated',
-    email,
-    email_confirmed_at: timestamp,
-    phone: '',
-    confirmed_at: timestamp,
-    last_sign_in_at: timestamp,
-    app_metadata: {
-      provider: 'email',
-      providers: ['email'],
-    },
-    user_metadata: {},
-    identities: [],
-    created_at: timestamp,
-    updated_at: timestamp,
-    is_anonymous: false,
-  };
-}
+type AuthMode = 'signIn' | 'signUp';
 
 function AuthScreen(): React.JSX.Element {
   useI18n();
-  const [email, setEmail] = useState<string>(MOCK_AUTH.defaultEmail);
+  const [mode, setMode] = useState<AuthMode>('signIn');
+  const [email, setEmail] = useState<string>('');
   const [password, setPassword] = useState('');
+  const [statusMessage, setStatusMessage] = useState<string | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const setUser = useAuthStore(state => state.setUser);
   const setBackendToken = useAuthStore(state => state.setBackendToken);
   const buttonScale = useSharedValue(1);
 
   const [isEmailFocused, setIsEmailFocused] = useState(false);
   const [isPasswordFocused, setIsPasswordFocused] = useState(false);
+  const isFormReady = email.trim().length > 0 && password.length >= 6;
 
   const animatedButtonStyle = useAnimatedStyle(() => ({
     transform: [{ scale: buttonScale.value }],
@@ -71,11 +57,53 @@ function AuthScreen(): React.JSX.Element {
     buttonScale.value = withSpring(1, { damping: 16, stiffness: 260 });
   };
 
-  const handleContinue = (): void => {
-    const normalizedEmail = email.trim() || MOCK_AUTH.fallbackEmail;
+  const handleSwitchMode = (): void => {
+    setMode(currentMode => (currentMode === 'signIn' ? 'signUp' : 'signIn'));
+    setStatusMessage(null);
+  };
 
-    setUser(createDemoUser(normalizedEmail));
-    setBackendToken(MOCK_AUTH.backendToken);
+  const getErrorMessage = (error: unknown): string => {
+    if (error instanceof Error) {
+      if (error.message.toLowerCase().includes('confirm')) {
+        return t('authConfirmEmail');
+      }
+
+      return error.message;
+    }
+
+    return t('authGenericError');
+  };
+
+  const handleContinue = async (): Promise<void> => {
+    if (!isFormReady || isSubmitting) {
+      setStatusMessage(t('authValidationError'));
+      return;
+    }
+
+    const credentials = {
+      email: email.trim(),
+      password,
+    };
+
+    setIsSubmitting(true);
+    setStatusMessage(null);
+
+    try {
+      const supabaseResult =
+        mode === 'signIn'
+          ? await signInWithEmail(credentials)
+          : await signUpWithEmail(credentials);
+      const exchanged = await exchangeSupabaseToken(
+        supabaseResult.session.access_token,
+      );
+
+      setBackendToken(exchanged.token);
+      setUser(supabaseResult.user);
+    } catch (error) {
+      setStatusMessage(getErrorMessage(error));
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -113,6 +141,43 @@ function AuthScreen(): React.JSX.Element {
           </View>
 
           <View style={styles.formPanel}>
+            <View style={styles.modeSwitch}>
+              <Pressable
+                accessibilityRole="button"
+                onPress={() => setMode('signIn')}
+                style={[
+                  styles.modeOption,
+                  mode === 'signIn' && styles.modeOptionActive,
+                ]}
+              >
+                <Text
+                  style={[
+                    styles.modeOptionText,
+                    mode === 'signIn' && styles.modeOptionTextActive,
+                  ]}
+                >
+                  {t('authSignInTab')}
+                </Text>
+              </Pressable>
+              <Pressable
+                accessibilityRole="button"
+                onPress={() => setMode('signUp')}
+                style={[
+                  styles.modeOption,
+                  mode === 'signUp' && styles.modeOptionActive,
+                ]}
+              >
+                <Text
+                  style={[
+                    styles.modeOptionText,
+                    mode === 'signUp' && styles.modeOptionTextActive,
+                  ]}
+                >
+                  {t('authSignUpTab')}
+                </Text>
+              </Pressable>
+            </View>
+
             <Text style={styles.inputLabel}>{t('authEmailLabel')}</Text>
             <TextInput
               autoCapitalize="none"
@@ -133,6 +198,7 @@ function AuthScreen(): React.JSX.Element {
               onChangeText={setPassword}
               placeholder={t('authPasswordPlaceholder')}
               placeholderTextColor={COLORS.textFaint}
+              returnKeyType="done"
               secureTextEntry
               selectionColor={COLORS.primaryAccent}
               style={[styles.input, isPasswordFocused && styles.inputFocused]}
@@ -143,15 +209,41 @@ function AuthScreen(): React.JSX.Element {
 
             <AnimatedPressable
               accessibilityRole="button"
+              accessibilityState={{ disabled: !isFormReady || isSubmitting }}
+              disabled={!isFormReady || isSubmitting}
               onPress={handleContinue}
               onPressIn={handlePressIn}
               onPressOut={handlePressOut}
-              style={[styles.primaryButton, animatedButtonStyle]}
+              style={[
+                styles.primaryButton,
+                (!isFormReady || isSubmitting) && styles.primaryButtonDisabled,
+                animatedButtonStyle,
+              ]}
             >
-              <Text style={styles.primaryButtonText}>
-                {t('authContinue')} 🔮
-              </Text>
+              {isSubmitting ? (
+                <ActivityIndicator color={COLORS.textPrimary} />
+              ) : (
+                <Text style={styles.primaryButtonText}>
+                  {mode === 'signIn' ? t('authSignIn') : t('authCreateAccount')}
+                </Text>
+              )}
             </AnimatedPressable>
+
+            {statusMessage ? (
+              <Text style={styles.statusText}>{statusMessage}</Text>
+            ) : null}
+
+            <Pressable
+              accessibilityRole="button"
+              onPress={handleSwitchMode}
+              style={styles.secondaryButton}
+            >
+              <Text style={styles.secondaryButtonText}>
+                {mode === 'signIn'
+                  ? t('authNeedAccount')
+                  : t('authHaveAccount')}
+              </Text>
+            </Pressable>
 
             <Text style={styles.helperText}>{t('authHelper')}</Text>
           </View>
@@ -232,6 +324,31 @@ const styles = StyleSheet.create({
     shadowRadius: 20,
     elevation: 8,
   },
+  modeSwitch: {
+    backgroundColor: COLORS.surface2,
+    borderRadius: 14,
+    flexDirection: 'row',
+    marginBottom: 20,
+    padding: 4,
+  },
+  modeOption: {
+    alignItems: 'center',
+    borderRadius: 10,
+    flex: 1,
+    minHeight: 40,
+    justifyContent: 'center',
+  },
+  modeOptionActive: {
+    backgroundColor: `${COLORS.primaryAccent}33`,
+  },
+  modeOptionText: {
+    ...TYPOGRAPHY.badge,
+    color: COLORS.textMuted,
+    fontWeight: '700',
+  },
+  modeOptionTextActive: {
+    color: COLORS.textPrimary,
+  },
   inputLabel: {
     ...TYPOGRAPHY.badge,
     color: COLORS.textMuted,
@@ -270,11 +387,32 @@ const styles = StyleSheet.create({
     shadowRadius: 8,
     elevation: 4,
   },
+  primaryButtonDisabled: {
+    opacity: 0.55,
+  },
   primaryButtonText: {
     ...TYPOGRAPHY.body,
     color: COLORS.textPrimary,
     fontWeight: '700',
     letterSpacing: 0.5,
+  },
+  statusText: {
+    ...TYPOGRAPHY.secondary,
+    color: COLORS.error,
+    lineHeight: 18,
+    marginTop: 14,
+    textAlign: 'center',
+  },
+  secondaryButton: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    minHeight: 42,
+    marginTop: 10,
+  },
+  secondaryButtonText: {
+    ...TYPOGRAPHY.secondary,
+    color: COLORS.secondaryAccent,
+    fontWeight: '700',
   },
   helperText: {
     ...TYPOGRAPHY.badge,

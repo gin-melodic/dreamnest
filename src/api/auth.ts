@@ -52,7 +52,7 @@ export async function signUpWithEmail(
   }
 
   if (!data.user || !data.session) {
-    throw new Error('Supabase sign-up requires email confirmation');
+    throw new Error('Please confirm your email before signing in.');
   }
 
   return {
@@ -74,7 +74,7 @@ export async function getSupabaseSession(): Promise<Session | null> {
 export async function exchangeSupabaseToken(
   supabaseToken: string,
 ): Promise<ExchangeSupabaseTokenResponse> {
-  return http.post<unknown, ExchangeSupabaseTokenResponse>('/v1/email/auth', {
+  return http.post<unknown, ExchangeSupabaseTokenResponse>('/auth/supabase', {
     supabase_token: supabaseToken,
   } satisfies ExchangeSupabaseTokenRequest);
 }

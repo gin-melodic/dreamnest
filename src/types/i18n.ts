@@ -20,6 +20,15 @@ export type LocaleKeys = {
   authPasswordLabel: string;
   authPasswordPlaceholder: string;
   authContinue: string;
+  authSignInTab: string;
+  authSignUpTab: string;
+  authSignIn: string;
+  authCreateAccount: string;
+  authNeedAccount: string;
+  authHaveAccount: string;
+  authValidationError: string;
+  authGenericError: string;
+  authConfirmEmail: string;
   authHelper: string;
   homeTitle: string;
   homeStreakLabel: string;

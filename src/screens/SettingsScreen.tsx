@@ -11,6 +11,7 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
+import { signOut } from '../api/auth';
 import { setLanguage, t, useI18n } from '../lib/i18n';
 import { MOCK_LANGUAGE_OPTIONS, MOCK_SETTINGS } from '../mocks/appMockData';
 import type { RootStackParamList } from '../navigation/AppNavigator';
@@ -24,6 +25,14 @@ function SettingsScreen(): React.JSX.Element {
   const user = useAuthStore(state => state.user);
   const backendToken = useAuthStore(state => state.backendToken);
   const clear = useAuthStore(state => state.clear);
+
+  const handleSignOut = async (): Promise<void> => {
+    try {
+      await signOut();
+    } finally {
+      clear();
+    }
+  };
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -105,7 +114,7 @@ function SettingsScreen(): React.JSX.Element {
         {/* Premium sign out button */}
         <Pressable
           accessibilityRole="button"
-          onPress={clear}
+          onPress={handleSignOut}
           style={styles.signOutButton}
         >
           <Text style={styles.signOutText}>{t('profileSignOut')}</Text>
